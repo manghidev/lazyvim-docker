@@ -1,0 +1,22 @@
+services:
+  code-editor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lazyvim
+    volumes:
+      #* Mount the user's Documents directory
+      - $HOME/Documents:/home/develop/Documents
+      #* Mount the Work directory
+      - /Volumes/ExternalSSD/Work:/home/develop/Work
+      #* Mount the Personal directory
+      - /Volumes/ExternalSSD/Personal:/home/develop/Personal
+      #* Volume for root configuration
+      - root-config:/root
+    stdin_open: true
+    tty: true
+
+volumes:
+  #* Volume to persist root configuration
+  root-config:
+    driver: local

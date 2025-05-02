@@ -12,6 +12,9 @@ RUN apk add --no-cache git lazygit fzf curl neovim ripgrep alpine-sdk zsh shadow
 RUN useradd -m -s /bin/zsh develop && \
     echo "develop ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
+#* Force removal of any existing .zshrc directory (just in case)
+RUN rm -rf /home/develop/.zshrc
+
 #* Switch to the 'develop' user for the rest of the setup
 USER develop
 WORKDIR /home/develop

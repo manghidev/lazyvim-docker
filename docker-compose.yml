@@ -5,19 +5,6 @@ services:
       dockerfile: Dockerfile
     container_name: lazyvim
     volumes:
-      #* Mount volume for oh-my-zsh
-      - develop-data:/home/develop
-
-      #* Mount the user's Documents directory
-      - $HOME/Documents:/home/develop/Documents
-      #* Mount the Work directory
-      - /Volumes/ExternalSSD/Work:/home/develop/Work
-      #* Mount the Personal directory
-      - /Volumes/ExternalSSD/Personal:/home/develop/Personal
+      - ~/.dotfiles:/home/develop/.dotfiles
     stdin_open: true
     tty: true
-
-volumes:
-  #* Volume for persistent data
-  develop-data:
-    driver: local

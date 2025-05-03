@@ -1,10 +1,12 @@
 #* Set the base image to Node.js LTS on Alpine
 FROM node:lts-alpine
 
+ARG VERSION
+
 #* Set metadata for image
 LABEL maintainer="ManghiDev <https://manghi.dev>" \
     description="Dockerfile for LazyVim and Zsh with oh-my-zsh" \
-    version="1.0.0"
+    version=$VERSION
 
 #* Install necessary dependencies
 RUN apk add --no-cache git lazygit fzf curl neovim ripgrep alpine-sdk zsh shadow

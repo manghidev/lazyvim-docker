@@ -1,4 +1,5 @@
 # Stop and remove the container
-docker compose down --rmi all
+# Stop and remove the container along with volumes
+docker compose down --rmi all --volumes
 
-echo "Container stopped and removed"
+echo "Container and volumes stopped and removed"

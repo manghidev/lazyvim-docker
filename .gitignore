@@ -1,0 +1,8 @@
+.dotfiles/.config/github-copilot/*
+.dotfiles/.cache/*
+.dotfiles/.local
+.dotfiles/.npm
+.dotfiles/.zcompdump-*
+.dotfiles/.zsh_history
+
+.DS_Store

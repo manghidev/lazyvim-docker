@@ -5,19 +5,17 @@ services:
       dockerfile: Dockerfile
     container_name: lazyvim
     volumes:
-      #* Mount volume for oh-my-zsh
-      - develop-data:/home/develop
+      - .dotfiles/.zshrc:/home/developer/.zshrc
+      - .dotfiles/.p10k.zsh:/home/developer/.p10k.zsh
+      - .dotfiles/.config/nvim:/home/developer/.config/nvim
 
-      #* Mount the user's Documents directory
-      - $HOME/Documents:/home/develop/Documents
-      #* Mount the Work directory
-      - /Volumes/ExternalSSD/Work:/home/develop/Work
-      #* Mount the Personal directory
-      - /Volumes/ExternalSSD/Personal:/home/develop/Personal
+      #* Mount the user's Documents directory in macOS
+      - $HOME/Documents:/home/developer/Documents
+      #* Mount the user's Documents directory in Linux
+      # - /home/user/Documents:/home/developer/Documents
+      #* Mount the user's USB in macOS
+      #- /Volumes/sdb1:/home/developer/usb
+      #* Mount the user's USB in Linux
+      #- /dev/sdb2:/home/developer/usb
     stdin_open: true
     tty: true
-
-volumes:
-  #* Volume for persistent data
-  develop-data:
-    driver: local

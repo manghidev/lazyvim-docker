@@ -8,10 +8,35 @@ This project provides a Dockerized environment to use LazyVim, an advanced Neovi
 
 - **LazyVim**: Predefined Neovim configuration to maximize productivity.
 - **Dockerized**: Fully isolated and reproducible environment.
-- **Zsh with Oh My Zsh**: Interactive shell with plugins and advanced customization.
+- **bash with Oh My bash**: Interactive shell with plugins and advanced customization.
 - **Included tools**: `git`, `lazygit`, `fzf`, `ripgrep`, among others.
 - **Volume mounting**: Direct access to your local files from the container.
 - **Persistent configuration**: Configuration changes are retained between sessions.
+
+---
+
+## Versioning
+
+This project uses a global version stored in the `VERSION` file located in the root of the repository. The version is used during the Docker image build process and is embedded as metadata in the image.
+
+### How to Update the Version
+
+1. Open the `VERSION` file in the root of the project.
+2. Update the version number (e.g., change `1.1.0` to `1.2.0`).
+3. Rebuild the Docker image using the `build.sh` script:
+```bash
+./build.sh
+   ```
+
+### Checking the Version in the Docker Image
+
+After building the image, you can verify the version embedded in the image by running:
+
+```bash
+docker inspect <image_name> | grep '"version"'
+```
+
+Replace `<image_name>` with the name of your Docker image.
 
 ---
 
@@ -46,26 +71,34 @@ chmod +x ./build.sh
 
 ## Installation
 
+### Automatic Installation
+If you want to automate the installation process, run the following command. This will clone the repository, navigate to the project folder, grant execution permissions to the scripts, and build the environment:
+
+```bash
+git clone https://github.com/manghidev/lazyvim-docker.git && cd lazyvim-docker && chmod +x ./build.sh ./init.sh ./destroy.sh && ./build.sh
+```
+
+### Manual Installation
 1. Clone this repository:
-   ```bash
-   git clone https://github.com/manghidev/lazyvim-docker.git
-   cd lazyvim-docker
-   ```
+```bash
+git clone https://github.com/manghidev/lazyvim-docker.git
+cd lazyvim-docker
+```
 
-2. Build the environment using the `build.sh` script:
-   ```bash
-   ./build.sh
-   ```
+2. Build the environment using the `build.sh` script (Only the first time, or when you want to update the image, as it will erase everything and rebuild everything):
+```bash
+./build.sh
+```
 
-3. If you need to re-enter the container, use the `init.sh` script:
-   ```bash
-   ./init.sh
-   ```
+3. If you need to re-enter or run the container again, use the `init.sh` script:
+```bash
+./init.sh
+```
 
-4. To destroy the environment (without deleting the volumes), use the `destroy.sh` script:
-   ```bash
-   ./destroy.sh
-   ```
+4. To destroy the environment (along with the volumes), use the `destroy.sh` script:
+```bash
+./destroy.sh
+```
 
 ---
 
@@ -131,4 +164,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Author
 
-Created by ManghiDev. For more information, visit [manghi.dev](https://manghi.dev).
+Created by ManghiDev. For more information, visit [https://manghi.dev](https://manghi.dev).

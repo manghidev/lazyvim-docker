@@ -1,66 +1,134 @@
 # LazyVim Docker Environment
 
-This repository provides a Dockerized environment for using LazyVim, Zsh with Oh My Zsh, and additional tools for development. It is designed to simplify the setup of a powerful and customizable code editor environment.
+This project provides a Dockerized environment to use LazyVim, an advanced Neovim configuration, along with essential developer tools.
+
+---
 
 ## Features
 
-- **LazyVim**: Pre-configured Neovim setup with LazyVim.
-- **Zsh with Oh My Zsh**: Includes plugins like `zsh-autosuggestions` and the `Powerlevel10k` theme.
-- **Essential Tools**: Includes `git`, `lazygit`, `fzf`, `curl`, `neovim`, `ripgrep`, and more.
-- **Persistent Configuration**: Root configuration is persisted using Docker volumes.
-- **Customizable**: Easily extend or modify the setup to suit your needs.
+- **LazyVim**: Predefined Neovim configuration to maximize productivity.
+- **Dockerized**: Fully isolated and reproducible environment.
+- **Zsh with Oh My Zsh**: Interactive shell with plugins and advanced customization.
+- **Included tools**: `git`, `lazygit`, `fzf`, `ripgrep`, among others.
+- **Volume mounting**: Direct access to your local files from the container.
+- **Persistent configuration**: Configuration changes are retained between sessions.
+
+---
 
 ## Requirements
 
-- Docker
-- Docker Compose
+- **Docker**: Make sure Docker is installed on your system.
+- **Docker Compose**: Required to manage the environment.
 
-## Setup
+---
+
+## Available Scripts
+
+- **`build.sh`**: Builds and configures the entire environment.
+- **`init.sh`**: Access the container after exiting.
+- **`destroy.sh`**: Stops and removes the containers but keeps the volumes.
+
+### Execution Permissions
+
+If the scripts do not have execution permissions, you can grant them using the following command, replacing `<script-name>` with the script file you want to execute:
+
+```bash
+chmod +x ./<script-name>
+```
+
+For example, to grant execution permissions to `build.sh`:
+
+```bash
+chmod +x ./build.sh
+```
+
+---
+
+## Installation
 
 1. Clone this repository:
-```sh
-git clone https://github.com/manghidev/lazyvim-docker.git
-cd lazyvim-docker
+   ```bash
+   git clone https://github.com/manghidev/lazyvim-docker.git
+   cd lazyvim-docker
+   ```
+
+2. Build the environment using the `build.sh` script:
+   ```bash
+   ./build.sh
+   ```
+
+3. If you need to re-enter the container, use the `init.sh` script:
+   ```bash
+   ./init.sh
+   ```
+
+4. To destroy the environment (without deleting the volumes), use the `destroy.sh` script:
+   ```bash
+   ./destroy.sh
+   ```
+
+---
+
+## Usage
+
+- **Edit files**: Use LazyVim to edit your files directly from the container.
+- **Customize configuration**: Modify the files in `/root/.config/nvim` to adjust LazyVim to your needs.
+- **Persistence**: Configuration changes are automatically saved thanks to the Docker volume.
+
+---
+
+## Volume Configuration
+
+You can edit the volumes in the `docker-compose.yml` file to add a documents folder or a USB drive according to your needs. By default, the following configurations are included:
+
+### Documents Directory on macOS
+Mount the user's Documents directory on macOS inside the container:
+```yaml
+- $HOME/Documents:/home/developer/Documents
 ```
 
-2. Build and start the container:
-```sh
-docker compose up -d
+### Documents Directory on Linux
+If you are using Linux, you can mount the user's Documents directory:
+```yaml
+- /home/user/Documents:/home/developer/Documents
 ```
 
-3. Access the container:
-```sh
-docker exec -it lazyvim /bin/zsh
+### USB Drive on macOS
+To mount a USB drive on macOS, use the following configuration:
+```yaml
+- /Volumes/sdb1:/home/developer/usb
 ```
 
-## Directory Structure
+### USB Drive on Linux
+If you need to mount a USB drive on Linux, use this configuration:
+```yaml
+- /dev/sdb2:/home/developer/usb
+```
 
-- `$HOME/Documents` is mounted to `/home/develop/Documents` inside the container.
-- `/Volumes/ExternalSSD/Work` is mounted to `/home/develop/Work`.
-- `/Volumes/ExternalSSD/Personal` is mounted to `/home/develop/Personal`.
+### Customization Example
+If you want to add a specific directory where you store your projects, you can edit the `docker-compose.yml` file and add a line like this:
+```yaml
+- /path/to/your/project:/home/developer/projects
+```
+This will mount the `/path/to/your/project` directory from your local system into the container at `/home/developer/projects`.
 
-## Persistent Configuration
+### Note
+You can modify these paths directly in the `docker-compose.yml` file to adapt them to your operating system and specific needs. Make sure the local paths exist on your system before starting the container.
 
-The root configuration is stored in a Docker volume named `root-config`. This ensures that your Zsh and LazyVim configurations persist across container restarts.
+---
 
-## Customization
+## Contributions
 
-- **Oh My Zsh Plugins**: Modify the `.zshrc` file to add or remove plugins.
-- **LazyVim Configuration**: Edit the files in `/root/.config/nvim` to customize LazyVim.
+Contributions are welcome! If you have ideas or improvements, feel free to open an issue or submit a pull request.
 
-## Included Tools
-
-- **LazyVim**: A pre-configured Neovim setup.
-- **Oh My Zsh**: A framework for managing Zsh configuration.
-- **Powerlevel10k**: A fast and customizable Zsh theme.
-- **fzf**: A command-line fuzzy finder.
-- **lazygit**: A simple terminal UI for Git commands.
-- **ripgrep**: A fast search tool.
+---
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+
+---
 
 ## Author
 
-Created by ManghiDev. For more information, visit [https://manghi.dev](https://manghi.dev).
+Created by ManghiDev. For more information, visit [manghi.dev](https://manghi.dev).

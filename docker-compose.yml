@@ -5,6 +5,17 @@ services:
       dockerfile: Dockerfile
     container_name: lazyvim
     volumes:
-      - ~/.dotfiles:/home/develop/.dotfiles
+      - .dotfiles/.zshrc:/home/developer/.zshrc
+      - .dotfiles/.p10k.zsh:/home/developer/.p10k.zsh
+      - .dotfiles/.config/nvim:/home/developer/.config/nvim
+
+      #* Mount the user's Documents directory in macOS
+      - $HOME/Documents:/home/developer/Documents
+      #* Mount the user's Documents directory in Linux
+      # - /home/user/Documents:/home/developer/Documents
+      #* Mount the user's USB in macOS
+      #- /Volumes/sdb1:/home/developer/usb
+      #* Mount the user's USB in Linux
+      #- /dev/sdb2:/home/developer/usb
     stdin_open: true
     tty: true

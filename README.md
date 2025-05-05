@@ -33,10 +33,8 @@ This project uses a global version stored in the `VERSION` file located in the r
 After building the image, you can verify the version embedded in the image by running:
 
 ```bash
-docker inspect <image_name> | grep '"version"'
+docker inspect lazyvim | grep '"version"'
 ```
-
-Replace `<image_name>` with the name of your Docker image.
 
 ---
 

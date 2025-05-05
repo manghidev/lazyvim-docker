@@ -9,6 +9,7 @@ services:
     volumes:
       - .dotfiles/.zshrc:/home/developer/.zshrc
       - .dotfiles/.p10k.zsh:/home/developer/.p10k.zsh
+      - .dotfiles/.config/lazygit:/home/developer/.config/lazygit
       - .dotfiles/.config/nvim:/home/developer/.config/nvim
 
       #* Mount the user's Documents directory in macOS

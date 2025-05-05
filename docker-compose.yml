@@ -17,8 +17,8 @@ services:
       #* Mount the user's Documents directory in Linux
       # - /home/user/Documents:/home/developer/Documents
       #* Mount the user's USB in macOS
-      #- /Volumes/sdb1:/home/developer/usb
+      # - /Volumes/sdb1:/home/developer/usb
       #* Mount the user's USB in Linux
-      #- /dev/sdb2:/home/developer/usb
+      # - /dev/sdb2:/home/developer/usb
     stdin_open: true
     tty: true

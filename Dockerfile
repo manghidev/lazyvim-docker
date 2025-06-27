@@ -74,7 +74,8 @@ RUN echo 'export EDITOR=nvim' >> /home/developer/.zshrc && \
 USER root
 
 #* Create cache directories and ensure proper permissions
-RUN mkdir -p /home/developer/.cache /home/developer/.local/share && \
+RUN mkdir -p /home/developer/.cache/nvim /home/developer/.cache/zsh /home/developer/.cache/pip \
+             /home/developer/.local/share/nvim /home/developer/.local/state/nvim && \
     chown -R developer:developer /home/developer
 
 #* Switch back to developer user

@@ -76,4 +76,4 @@ else
 fi
 
 log_success "LazyVim Docker environment has been completely destroyed"
-log_info "To rebuild the environment, run './build.sh' or 'make build'"
+log_info "To rebuild the environment, run 'make build'"

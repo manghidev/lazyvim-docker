@@ -96,11 +96,11 @@ health_check() {
             
         else
             log_warning "Container exists but is not running"
-            echo "  Use 'make start' or './init.sh' to start it"
+            echo "  Use 'make start' to start it"
         fi
     else
         log_warning "Container does not exist"
-        echo "  Use 'make build' or './build.sh' to create it"
+        echo "  Use 'make build' to create it"
     fi
     
     print_separator

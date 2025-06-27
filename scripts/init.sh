@@ -52,7 +52,7 @@ if ! docker compose ps | grep -q "$CONTAINER_NAME"; then
         exit 0
     else
         log_error "Cannot proceed without building the environment first."
-        log_info "Run './build.sh' or 'make build' to build the environment."
+        log_info "Run 'make build' to build the environment."
         exit 1
     fi
 fi

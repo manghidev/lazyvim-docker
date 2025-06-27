@@ -1,3 +1,6 @@
+# LazyVim Docker - Git Ignore
+
+# Dotfiles - sensitive or user-specific data
 .dotfiles/.config/github-copilot/*
 .dotfiles/.cache/*
 .dotfiles/.local
@@ -5,4 +8,39 @@
 .dotfiles/.zcompdump-*
 .dotfiles/.zsh_history
 
+# Backup files
+backups/
+*.backup
+*.bak
+
+# Temporary files
+*.tmp
+*.temp
+.temp/
+
+# OS specific files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Docker specific
+.docker/
+
+# Logs
+*.log
+logs/
+
+# Environment files
+.env.local
+.env.*.local

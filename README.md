@@ -1,165 +1,289 @@
 # LazyVim Docker Environment
 
-This project provides a Dockerized environment to use LazyVim, an advanced Neovim configuration, along with essential developer tools.
+A professional Dockerized environment for LazyVim (advanced Neovim configuration) with essential developer tools. Perfect for development without installing anything on your host machine!
 
 ---
 
-## Features
+## 🚀 Quick Start
 
-- **LazyVim**: Predefined Neovim configuration to maximize productivity.
-- **Dockerized**: Fully isolated and reproducible environment.
-- **bash with Oh My bash**: Interactive shell with plugins and advanced customization.
-- **Included tools**: `git`, `lazygit`, `fzf`, `ripgrep`, among others.
-- **Volume mounting**: Direct access to your local files from the container.
-- **Persistent configuration**: Configuration changes are retained between sessions.
-
----
-
-## Versioning
-
-This project uses a global version stored in the `VERSION` file located in the root of the repository. The version is used during the Docker image build process and is embedded as metadata in the image.
-
-### How to Update the Version
-
-1. Open the `VERSION` file in the root of the project.
-2. Update the version number (e.g., change `1.1.0` to `1.2.0`).
-3. Rebuild the Docker image using the `build.sh` script:
+### One-Line Installation (Recommended)
 ```bash
-./build.sh
-   ```
-
-### Checking the Version in the Docker Image
-
-After building the image, you can verify the version embedded in the image by running:
-
-```bash
-docker inspect lazyvim | grep '"version"'
-```
-
----
-
-## Requirements
-
-- **Docker**: Make sure Docker is installed on your system.
-- **Docker Compose**: Required to manage the environment.
-
----
-
-## Available Scripts
-
-- **`build.sh`**: Builds and configures the entire environment.
-- **`init.sh`**: Access the container after exiting.
-- **`destroy.sh`**: Stops and removes the containers but keeps the volumes.
-
-### Execution Permissions
-
-If the scripts do not have execution permissions, you can grant them using the following command, replacing `<script-name>` with the script file you want to execute:
-
-```bash
-chmod +x ./<script-name>
-```
-
-For example, to grant execution permissions to `build.sh`:
-
-```bash
-chmod +x ./build.sh
-```
-
----
-
-## Installation
-
-### Automatic Installation
-If you want to automate the installation process, run the following command. This will clone the repository, navigate to the project folder, grant execution permissions to the scripts, and build the environment:
-
-```bash
-git clone https://github.com/manghidev/lazyvim-docker.git && cd lazyvim-docker && chmod +x ./build.sh ./init.sh ./destroy.sh && ./build.sh
+git clone https://github.com/manghidev/lazyvim-docker.git && cd lazyvim-docker && make quick
 ```
 
 ### Manual Installation
-1. Clone this repository:
 ```bash
 git clone https://github.com/manghidev/lazyvim-docker.git
 cd lazyvim-docker
+make build    # Build the environment
+make enter    # Enter the container
 ```
 
-2. Build the environment using the `build.sh` script (Only the first time, or when you want to update the image, as it will erase everything and rebuild everything):
+---
+
+## ✨ Features
+
+- **LazyVim**: Predefined Neovim configuration for maximum productivity
+- **Dockerized**: Fully isolated and reproducible environment
+- **Rich Terminal**: Zsh with Oh My Zsh, Powerlevel10k theme, and useful plugins
+- **40+ Developer Tools**: git, lazygit, tmux, python, node.js, and many more
+- **Easy Management**: Simple make commands for all operations
+- **Persistent Configuration**: All changes are saved between sessions
+- **Cross-Platform**: Works on macOS and Linux
+
+---
+
+## 🎯 Main Commands
+
 ```bash
-./build.sh
+make help          # Show all available commands
+make enter         # 🔥 DAILY USE: Enter container (starts automatically if stopped)
+make start         # Start existing container (preserves all data)
+make stop          # Stop container (saves all data and plugins)
+make status        # Check container status
+make build         # ⚠️  ONLY for first time or major updates
+make destroy       # ⚠️  DANGEROUS: Removes everything
 ```
 
-3. If you need to re-enter or run the container again, use the `init.sh` script:
+> 💡 **For daily development**: Just use `make enter` - it handles everything!
+
+For detailed workflow and troubleshooting: **[📖 Container Lifecycle Guide](docs/CONTAINER_LIFECYCLE.md)**
+
+---
+
+## 🔧 Configuration
+
+### Timezone Configuration
+Configure your local timezone to match the container time. Edit the `docker-compose.yml` file:
+
+```yaml
+# In docker-compose.yml, modify these lines:
+services:
+  code-editor:
+    build:
+      args:
+        VERSION: x.x.x
+        TIMEZONE: America/Mexico_City  # Change to your timezone
+    environment:
+      - TZ=America/Mexico_City         # Change to your timezone
+```
+
+Common timezones:
+- `America/Mexico_City` (UTC-6)
+- `America/New_York` (UTC-5/-4)
+- `America/Los_Angeles` (UTC-8/-7)
+- `Europe/Madrid` (UTC+1/+2)
+- `Europe/London` (UTC+0/+1)
+- `Asia/Tokyo` (UTC+9)
+
+After changing the timezone, rebuild the container:
 ```bash
-./init.sh
+make build
 ```
 
-4. To destroy the environment (along with the volumes), use the `destroy.sh` script:
+Check the current timezone configuration:
 ```bash
-./destroy.sh
+make timezone
+```
+
+### Volume Mounting
+By default, your `Documents` folder is mounted. Edit `docker-compose.yml` to add more directories:
+
+```yaml
+volumes:
+  # Already included
+  - $HOME/Documents:/home/developer/Documents
+  
+  # Add your project directories
+  - $HOME/Projects:/home/developer/Projects
+  - $HOME/Developer:/home/developer/Developer
+```
+
+### Initial Setup
+Run the interactive setup for personalized configuration:
+```bash
+make build  # First build the environment
 ```
 
 ---
 
-## Usage
+## 📁 Project Structure
 
-- **Edit files**: Use LazyVim to edit your files directly from the container.
-- **Customize configuration**: Modify the files in `/root/.config/nvim` to adjust LazyVim to your needs.
-- **Persistence**: Configuration changes are automatically saved thanks to the Docker volume.
+```
+lazyvim-docker/
+├── Makefile                 # Main command interface
+├── docker-compose.yml       # Docker configuration
+├── Dockerfile              # Container definition
+├── VERSION                 # Current version
+├── docs/                   # Documentation
+│   ├── COMMANDS.md         # Complete command reference
+│   └── CHANGELOG.md        # Version history
+├── scripts/                # Internal scripts (use make commands instead)
+│   ├── build.sh           # Build script
+│   ├── init.sh            # Init script
+│   ├── destroy.sh         # Destroy script
+│   ├── setup.sh           # Interactive setup
+│   ├── health-check.sh    # Environment diagnostics
+│   └── bump-version.sh    # Version management
+└── .dotfiles/             # Persistent configuration
+    ├── .zshrc            # Shell configuration
+    ├── .p10k.zsh         # Theme configuration
+    └── .config/          # App configurations
+        ├── nvim/         # Neovim/LazyVim
+        └── lazygit/      # Git TUI
+```
 
 ---
 
-## Volume Configuration
+## 🛠️ Included Tools
 
-You can edit the volumes in the `docker-compose.yml` file to add a documents folder or a USB drive according to your needs. By default, the following configurations are included:
+**Core Development:**
+- Neovim with LazyVim configuration
+- Git + Lazygit (Git TUI)
+- Node.js LTS + npm
+- Python 3 + pip with dev packages
 
-### Documents Directory on macOS
-Mount the user's Documents directory on macOS inside the container:
-```yaml
-- $HOME/Documents:/home/developer/Documents
-```
+**Terminal Enhancement:**
+- Zsh with Oh My Zsh + Powerlevel10k
+- fzf (fuzzy finder), ripgrep (fast search)
+- bat (better cat), exa (better ls), fd (better find)
+- tmux (terminal multiplexer)
 
-### Documents Directory on Linux
-If you are using Linux, you can mount the user's Documents directory:
-```yaml
-- /home/user/Documents:/home/developer/Documents
-```
-
-### USB Drive on macOS
-To mount a USB drive on macOS, use the following configuration:
-```yaml
-- /Volumes/sdb1:/home/developer/usb
-```
-
-### USB Drive on Linux
-If you need to mount a USB drive on Linux, use this configuration:
-```yaml
-- /dev/sdb2:/home/developer/usb
-```
-
-### Customization Example
-If you want to add a specific directory where you store your projects, you can edit the `docker-compose.yml` file and add a line like this:
-```yaml
-- /path/to/your/project:/home/developer/projects
-```
-This will mount the `/path/to/your/project` directory from your local system into the container at `/home/developer/projects`.
-
-### Note
-You can modify these paths directly in the `docker-compose.yml` file to adapt them to your operating system and specific needs. Make sure the local paths exist on your system before starting the container.
+**System Tools:**
+- htop, tree, curl, wget
+- make, cmake, g++
+- jq, yq (JSON/YAML processors)
 
 ---
 
-## Contributions
+## 🩺 Health & Maintenance
 
-Contributions are welcome! If you have ideas or improvements, feel free to open an issue or submit a pull request.
+```bash
+make status               # Check container status
+make backup               # Backup configurations
+make clean                # Clean up Docker resources
+```
+
+For detailed diagnostics:
+```bash
+# Internal health check (comprehensive diagnostics)
+./scripts/health-check.sh
+```
 
 ---
 
-## License
+## 🔄 Version Management
+
+```bash
+make version                    # Show current version
+make bump-version TYPE=patch    # Bump version (patch/minor/major)
+```
+
+---
+
+## 🐛 Troubleshooting
+
+**Container won't start:**
+```bash
+make status       # Check what's wrong
+make destroy      # Nuclear option: rebuild everything
+make build
+```
+
+**Need fresh start:**
+```bash
+make destroy && make build
+```
+
+**Performance issues:**
+```bash
+make clean        # Free up disk space
+```
+
+---
+
+## 📚 Documentation
+
+- **[📖 Complete Commands Reference](docs/COMMANDS.md)** - All available commands and workflows
+- **[📝 Changelog](docs/CHANGELOG.md)** - Version history and updates
+
+---
+
+**Ready to code? Run `make quick` and start developing! 🚀**
+
+## 💡 Usage Tips
+
+### First Time Setup
+1. Run the container: `make build`
+2. Configure Powerlevel10k theme: `p10k configure`
+3. Customize Neovim as needed
+4. Set up git: `git config --global user.name "Your Name"`
+
+### Daily Workflow
+1. Start container: `make start` or `make enter`
+2. Work on your projects in mounted directories
+3. All changes in .dotfiles are persisted
+4. Stop when done: `make stop`
+
+### Accessing Your Files
+- Documents: `/home/developer/Documents`
+- Projects: `/home/developer/Projects` (if configured)
+- Custom mounts: As configured in docker-compose.yml
+
+### Terminal Features
+- **Auto-suggestions**: Start typing, get suggestions from history
+- **Syntax highlighting**: Commands are highlighted as you type
+- **Fast search**: Use `Ctrl+R` for history search with fzf
+- **Git integration**: Lazygit with `lg` command or `lazygit`
+
+---
+
+## 🤝 Contributions
+
+Contributions are welcome! Here's how you can help:
+
+1. **Fork** the repository
+2. **Create** a feature branch: `git checkout -b feature/amazing-feature`
+3. **Commit** your changes: `git commit -m 'Add amazing feature'`
+4. **Push** to the branch: `git push origin feature/amazing-feature`
+5. **Open** a Pull Request
+
+### Development Guidelines
+- Follow existing code style
+- Add appropriate documentation
+- Test your changes
+- Update version number if needed
+
+---
+
+## 📝 License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
 
 ---
 
-## Author
+## 👨‍💻 Author
 
-Created by ManghiDev. For more information, visit [https://manghi.dev](https://manghi.dev).
+Created by **ManghiDev**  
+🌐 Website: [Personal Web](https://manghi.dev)  
+📧 Contact: [GitHub Issues](https://github.com/manghidev/lazyvim-docker/issues)
+
+---
+
+## ⭐ Support
+
+If you find this project helpful, please consider:
+- ⭐ Starring the repository
+- 🐛 Reporting bugs
+- 💡 Suggesting new features
+- 📖 Improving documentation
+
+---
+
+## 📚 Additional Resources
+
+- [LazyVim Documentation](https://lazyvim.github.io/)
+- [Neovim Documentation](https://neovim.io/doc/)
+- [Docker Documentation](https://docs.docker.com/)
+- [Oh My Zsh Documentation](https://ohmyz.sh/)
+- [Powerlevel10k Documentation](https://github.com/romkatv/powerlevel10k)

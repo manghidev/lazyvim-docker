@@ -5,19 +5,69 @@ services:
       dockerfile: Dockerfile
       args:
         VERSION: ${VERSION:-1.0.0}
+        TIMEZONE: America/Mexico_City
     container_name: lazyvim
+    hostname: lazyvim-dev
+    restart: unless-stopped
     volumes:
+      #* Persistent dotfiles
       - .dotfiles/.zshrc:/home/developer/.zshrc
       - .dotfiles/.p10k.zsh:/home/developer/.p10k.zsh
+      - .dotfiles/.config/lazygit:/home/developer/.config/lazygit
       - .dotfiles/.config/nvim:/home/developer/.config/nvim
+      
+      #* Cache directories for better performance
+      - nvim-cache:/home/developer/.cache/nvim
+      - zsh-cache:/home/developer/.cache/zsh
+      - npm-cache:/home/developer/.npm
+      - pip-cache:/home/developer/.cache/pip
 
-      #* Mount the user's Documents directory in macOS
+      #* Mount directories based on your OS
+      #* Uncomment and modify the appropriate lines below
+
+      #* Mount the user's Documents directory on macOS
       - $HOME/Documents:/home/developer/Documents
-      #* Mount the user's Documents directory in Linux
-      # - /home/user/Documents:/home/developer/Documents
-      #* Mount the user's USB in macOS
-      #- /Volumes/sdb1:/home/developer/usb
-      #* Mount the user's USB in Linux
-      #- /dev/sdb2:/home/developer/usb
+      
+      #* Mount the user's Documents directory on Linux
+      # - $HOME/Documents:/home/developer/Documents
+      
+      #* Mount the user's Desktop directory
+      # - $HOME/Desktop:/home/developer/Desktop
+      
+      #* Mount a development projects directory
+      # - $HOME/Projects:/home/developer/Projects
+      # - $HOME/Developer:/home/developer/Developer
+      
+      #* Mount the user's USB on macOS
+      # - /Volumes/USB_NAME:/home/developer/usb
+      
+      #* Mount the user's USB on Linux
+      # - /media/$USER/USB_NAME:/home/developer/usb
+      
+      #* Mount additional drives or directories
+      # - /path/to/your/custom/directory:/home/developer/custom
+      
+    environment:
+      - TERM=xterm-256color
+      - COLORTERM=truecolor
+      - LANG=en_US.UTF-8
+      - LC_ALL=en_US.UTF-8
+      - TZ=America/Mexico_City
     stdin_open: true
     tty: true
+    # Uncomment for network access to specific ports
+    # ports:
+    #   - "3000:3000"    # For web development
+    #   - "8080:8080"    # For alternative web dev
+    #   - "5173:5173"    # For Vite dev server
+
+# Named volumes for better performance and persistence
+volumes:
+  nvim-cache:
+    driver: local
+  zsh-cache:
+    driver: local
+  npm-cache:
+    driver: local
+  pip-cache:
+    driver: local

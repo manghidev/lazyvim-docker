@@ -88,11 +88,6 @@ restore: ## Restore from backup (requires BACKUP_FILE variable)
 	@tar -xzf $(BACKUP_FILE)
 	@echo "$(GREEN)Restore completed$(NC)"
 
-dev: ## Development mode - start with current directory mounted
-	@echo "$(BLUE)Starting in development mode...$(NC)"
-	@docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
-	@docker exec -it $(CONTAINER_NAME) zsh
-
 quick: ## Quick start - build and enter in one command
 	@echo "$(BLUE)Quick start: building and entering container...$(NC)"
 	@make build && make enter

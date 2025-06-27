@@ -1,7 +1,0 @@
-services:
-  code-editor:
-    volumes:
-      # Mount current directory for development
-      - .:/home/developer/workspace
-      # Add any additional development-specific volumes here
-      - /tmp:/tmp

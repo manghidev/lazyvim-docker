@@ -62,7 +62,7 @@ services:
   code-editor:
     build:
       args:
-        VERSION: 1.2.0
+        VERSION: x.x.x
         TIMEZONE: America/Mexico_City  # Change to your timezone
     environment:
       - TZ=America/Mexico_City         # Change to your timezone
@@ -135,7 +135,7 @@ lazyvim-docker/
 
 ---
 
-## �️ Included Tools
+## 🛠️ Included Tools
 
 **Core Development:**
 - Neovim with LazyVim configuration
@@ -209,16 +209,6 @@ make clean        # Free up disk space
 
 ---
 
-## ⭐ Support
-
-If this project helps you, please:
-- ⭐ Star the repository
-- 🐛 Report issues
-- 💡 Suggest improvements
-- 📖 Improve documentation
-
----
-
 **Ready to code? Run `make quick` and start developing! 🚀**
 
 ## 💡 Usage Tips
@@ -275,7 +265,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## 👨‍💻 Author
 
 Created by **ManghiDev**  
-🌐 Website: [Personal web](https://manghi.dev)  
+🌐 Website: [Personal Web](https://manghi.dev)  
 📧 Contact: [GitHub Issues](https://github.com/manghidev/lazyvim-docker/issues)
 
 ---

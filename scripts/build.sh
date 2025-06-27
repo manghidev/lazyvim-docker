@@ -100,4 +100,4 @@ else
 fi
 
 log_success "Build process completed successfully!"
-log_info "Use 'make enter' or './init.sh' to access the container again"
+log_info "Use 'make enter' to access the container again"

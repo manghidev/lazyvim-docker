@@ -1,7 +1,7 @@
 # LazyVim Docker - Makefile
 # Provides easy-to-use commands for managing the LazyVim Docker environment
 
-.PHONY: help build start enter stop destroy clean status update logs backup restore dev quick version bump-version
+.PHONY: help build start enter stop destroy clean status update logs backup restore dev quick version bump-version restart
 
 # Default target
 .DEFAULT_GOAL := help
@@ -31,19 +31,50 @@ build: ## Build the Docker environment (clean build)
 
 start: ## Start the container (if already built)
 	@echo "$(BLUE)Starting LazyVim container...$(NC)"
-	@./scripts/init.sh
+	@CONTAINER_STATE=$$(docker inspect $(CONTAINER_NAME) 2>/dev/null | grep '"Status"' | cut -d'"' -f4 || echo "missing"); \
+	if [ "$$CONTAINER_STATE" = "missing" ]; then \
+		echo "$(RED)Container not found. Please build first with 'make build'$(NC)"; \
+		exit 1; \
+	elif [ "$$CONTAINER_STATE" = "running" ]; then \
+		echo "$(GREEN)Container is already running$(NC)"; \
+	else \
+		echo "$(YELLOW)Starting existing container...$(NC)"; \
+		if docker compose start; then \
+			echo "$(GREEN)Container started successfully$(NC)"; \
+		else \
+			echo "$(RED)Failed to start container$(NC)"; \
+			exit 1; \
+		fi \
+	fi
 
 enter: ## Enter the running container
 	@echo "$(BLUE)Entering LazyVim container...$(NC)"
-	@docker exec -it $(CONTAINER_NAME) zsh 2>/dev/null || { \
-		echo "$(RED)Container not running. Starting it first...$(NC)"; \
-		make start; \
-	}
+	@CONTAINER_STATE=$$(docker inspect $(CONTAINER_NAME) 2>/dev/null | grep '"Status"' | cut -d'"' -f4 || echo "missing"); \
+	if [ "$$CONTAINER_STATE" = "missing" ]; then \
+		echo "$(RED)Container not found. Please build first with 'make build'$(NC)"; \
+		exit 1; \
+	elif [ "$$CONTAINER_STATE" = "running" ]; then \
+		docker exec -it $(CONTAINER_NAME) zsh; \
+	else \
+		echo "$(YELLOW)Container not running. Starting it first...$(NC)"; \
+		if docker compose start; then \
+			sleep 2; \
+			docker exec -it $(CONTAINER_NAME) zsh; \
+		else \
+			echo "$(RED)Failed to start container$(NC)"; \
+			exit 1; \
+		fi \
+	fi
 
 stop: ## Stop the container (keeps volumes)
 	@echo "$(YELLOW)Stopping LazyVim container...$(NC)"
 	@docker compose stop
 	@echo "$(GREEN)Container stopped$(NC)"
+
+restart: ## Restart the container (stop and start)
+	@echo "$(BLUE)Restarting LazyVim container...$(NC)"
+	@docker compose restart
+	@echo "$(GREEN)Container restarted$(NC)"
 
 destroy: ## Destroy everything (container, images, and volumes)
 	@echo "$(RED)Destroying LazyVim environment...$(NC)"
@@ -57,12 +88,18 @@ clean: ## Clean up unused Docker resources
 
 status: ## Show container status
 	@echo "$(BLUE)Container Status:$(NC)"
-	@docker compose ps
-	@echo ""
-	@echo "$(BLUE)Container Info:$(NC)"
-	@docker inspect $(CONTAINER_NAME) --format='{{.State.Status}}' 2>/dev/null | \
-		sed 's/running/$(GREEN)Running$(NC)/' | \
-		sed 's/exited/$(RED)Stopped$(NC)/' || echo "$(RED)Not found$(NC)"
+	@CONTAINER_STATE=$$(docker inspect $(CONTAINER_NAME) 2>/dev/null | grep '"Status"' | cut -d'"' -f4 || echo "missing"); \
+	if [ "$$CONTAINER_STATE" = "missing" ]; then \
+		echo "$(RED)✗ Container does not exist$(NC)"; \
+		echo "$(BLUE)Use 'make build' to create the container$(NC)"; \
+	elif [ "$$CONTAINER_STATE" = "running" ]; then \
+		echo "$(GREEN)✓ Container exists and is running$(NC)"; \
+		docker compose ps; \
+	else \
+		echo "$(YELLOW)⚠ Container exists but is stopped ($$CONTAINER_STATE)$(NC)"; \
+		echo "$(BLUE)Use 'make start' to start the container$(NC)"; \
+		docker compose ps; \
+	fi
 
 logs: ## Show container logs
 	@echo "$(BLUE)Container Logs:$(NC)"
@@ -88,9 +125,17 @@ restore: ## Restore from backup (requires BACKUP_FILE variable)
 	@tar -xzf $(BACKUP_FILE)
 	@echo "$(GREEN)Restore completed$(NC)"
 
-quick: ## Quick start - build and enter in one command
-	@echo "$(BLUE)Quick start: building and entering container...$(NC)"
-	@make build && make enter
+quick: ## Quick start - start container and enter (build only if needed)
+	@echo "$(BLUE)Quick start...$(NC)"
+	@CONTAINER_STATE=$$(docker inspect $(CONTAINER_NAME) 2>/dev/null | grep '"Status"' | cut -d'"' -f4 || echo "missing"); \
+	if [ "$$CONTAINER_STATE" = "missing" ]; then \
+		echo "$(YELLOW)Container not found. Building first...$(NC)"; \
+		make build && make enter; \
+	elif [ "$$CONTAINER_STATE" = "running" ]; then \
+		make enter; \
+	else \
+		make start && make enter; \
+	fi
 
 version: ## Show current version
 	@echo "$(GREEN)Current version: $(VERSION)$(NC)"

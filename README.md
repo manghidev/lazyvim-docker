@@ -33,20 +33,21 @@ make enter    # Enter the container
 
 ---
 
-## � Main Commands
+## 🎯 Main Commands
 
 ```bash
 make help          # Show all available commands
-make quick         # Quick start - build and enter in one command
-make build         # Build the Docker environment
-make enter         # Enter the running container
-make stop          # Stop the container
-make destroy       # Destroy everything
-make status        # Check environment status
-make backup        # Backup your configuration
+make enter         # 🔥 DAILY USE: Enter container (starts automatically if stopped)
+make start         # Start existing container (preserves all data)
+make stop          # Stop container (saves all data and plugins)
+make status        # Check container status
+make build         # ⚠️  ONLY for first time or major updates
+make destroy       # ⚠️  DANGEROUS: Removes everything
 ```
 
-For a complete list of commands, see: **[📖 Commands Reference](docs/COMMANDS.md)**
+> 💡 **For daily development**: Just use `make enter` - it handles everything!
+
+For detailed workflow and troubleshooting: **[📖 Container Lifecycle Guide](docs/CONTAINER_LIFECYCLE.md)**
 
 ---
 

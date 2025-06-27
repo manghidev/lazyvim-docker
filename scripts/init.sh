@@ -41,8 +41,10 @@ if ! docker info >/dev/null 2>&1; then
     exit 1
 fi
 
-# Check if container exists
-if ! docker compose ps | grep -q "$CONTAINER_NAME"; then
+# Check if container exists and its state
+CONTAINER_STATE=$(docker inspect "$CONTAINER_NAME" 2>/dev/null | grep '"Status"' | cut -d'"' -f4 || echo "missing")
+
+if [ "$CONTAINER_STATE" = "missing" ]; then
     log_warning "Container not found. You may need to build it first."
     read -p "Do you want to build the environment? (y/N): " -n 1 -r
     echo
@@ -55,21 +57,17 @@ if ! docker compose ps | grep -q "$CONTAINER_NAME"; then
         log_info "Run 'make build' to build the environment."
         exit 1
     fi
-fi
-
-# Start the container if it's not running
-if ! docker compose ps | grep -q "Up"; then
-    log_info "Starting the container..."
-    if docker compose up -d; then
+elif [ "$CONTAINER_STATE" = "running" ]; then
+    log_info "Container is already running"
+else
+    log_info "Container exists but is stopped. Starting it..."
+    if docker compose start; then
         log_success "Container started successfully"
-        # Wait a moment for the container to be fully ready
         sleep 2
     else
-        log_error "Failed to start container"
+        log_error "Failed to start existing container"
         exit 1
     fi
-else
-    log_info "Container is already running"
 fi
 
 # Enter the container

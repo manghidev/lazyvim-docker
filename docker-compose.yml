@@ -25,10 +25,10 @@ services:
       #* Mount directories based on your OS
       #* Uncomment and modify the appropriate lines below
 
-      #* Mount the user's Documents directory in macOS
+      #* Mount the user's Documents directory on macOS
       - $HOME/Documents:/home/developer/Documents
       
-      #* Mount the user's Documents directory in Linux
+      #* Mount the user's Documents directory on Linux
       # - $HOME/Documents:/home/developer/Documents
       
       #* Mount the user's Desktop directory
@@ -38,10 +38,10 @@ services:
       # - $HOME/Projects:/home/developer/Projects
       # - $HOME/Developer:/home/developer/Developer
       
-      #* Mount the user's USB in macOS
+      #* Mount the user's USB on macOS
       # - /Volumes/USB_NAME:/home/developer/usb
       
-      #* Mount the user's USB in Linux
+      #* Mount the user's USB on Linux
       # - /media/$USER/USB_NAME:/home/developer/usb
       
       #* Mount additional drives or directories

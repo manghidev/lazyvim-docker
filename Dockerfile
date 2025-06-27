@@ -24,11 +24,19 @@ RUN apk add --no-cache \
     jq yq sed gawk grep \
     # Terminal enhancements
     bat exa fd github-cli \
+    # Timezone support
+    tzdata \
     # Python packages via apk (more stable on Alpine)
     && apk add --no-cache py3-requests py3-beautifulsoup4 \
     # Install some Python tools that need pip
     && pip3 install --break-system-packages --no-cache-dir \
     black flake8 mypy pytest pandas
+
+#* Configure timezone (default to America/Mexico_City, can be overridden with build arg)
+ARG TIMEZONE=America/Mexico_City
+ENV TZ=$TIMEZONE
+RUN cp /usr/share/zoneinfo/$TIMEZONE /etc/localtime && \
+    echo $TIMEZONE > /etc/timezone
 
 #* Create a new user 'developer' with home directory and grant sudo privileges
 RUN adduser -D -s /bin/zsh developer && \

@@ -95,6 +95,10 @@ quick: ## Quick start - build and enter in one command
 version: ## Show current version
 	@echo "$(GREEN)Current version: $(VERSION)$(NC)"
 
+timezone: ## Check timezone configuration in container
+	@echo "$(BLUE)Checking timezone configuration...$(NC)"
+	@./scripts/check-timezone.sh
+
 bump-version: ## Bump version (patch, minor, major)
 	@if [ -z "$(TYPE)" ]; then \
 		echo "$(RED)Please specify TYPE. Example: make bump-version TYPE=patch$(NC)"; \

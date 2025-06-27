@@ -52,6 +52,39 @@ For a complete list of commands, see: **[📖 Commands Reference](docs/COMMANDS.
 
 ## 🔧 Configuration
 
+### Timezone Configuration
+Configure your local timezone to match the container time. Edit the `docker-compose.yml` file:
+
+```yaml
+# In docker-compose.yml, modify these lines:
+services:
+  code-editor:
+    build:
+      args:
+        VERSION: 1.2.0
+        TIMEZONE: America/Mexico_City  # Change to your timezone
+    environment:
+      - TZ=America/Mexico_City         # Change to your timezone
+```
+
+Common timezones:
+- `America/Mexico_City` (UTC-6)
+- `America/New_York` (UTC-5/-4)
+- `America/Los_Angeles` (UTC-8/-7)
+- `Europe/Madrid` (UTC+1/+2)
+- `Europe/London` (UTC+0/+1)
+- `Asia/Tokyo` (UTC+9)
+
+After changing the timezone, rebuild the container:
+```bash
+make build
+```
+
+Check the current timezone configuration:
+```bash
+make timezone
+```
+
 ### Volume Mounting
 By default, your `Documents` folder is mounted. Edit `docker-compose.yml` to add more directories:
 

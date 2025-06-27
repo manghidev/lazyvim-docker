@@ -48,7 +48,7 @@ if ! docker compose ps | grep -q "$CONTAINER_NAME"; then
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         log_info "Building environment..."
-        ./build.sh
+        ./scripts/build.sh
         exit 0
     else
         log_error "Cannot proceed without building the environment first."

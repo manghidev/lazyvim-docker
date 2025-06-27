@@ -44,7 +44,11 @@ if [[ ! -f "$VERSION_FILE" ]]; then
 fi
 
 VERSION=$(cat "$VERSION_FILE")
+# Get timezone from docker-compose.yml
+TIMEZONE=$(grep -A 10 "args:" docker-compose.yml | grep "TIMEZONE:" | awk '{print $2}' || echo "America/Mexico_City")
+
 log_info "Building LazyVim Docker environment v$VERSION"
+log_info "Timezone: $TIMEZONE"
 
 # Create .dotfiles directory if it doesn't exist
 if [[ ! -d "$DOTFILES_DIR" ]]; then

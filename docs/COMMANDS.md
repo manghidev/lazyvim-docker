@@ -13,6 +13,7 @@ This document provides a comprehensive guide to all available commands in the La
 | `make help` | Show all available commands with descriptions | `make help` |
 | `make version` | Show current project version | `make version` |
 | `make status` | Show container and environment status | `make status` |
+| `make health` | Run comprehensive health diagnostics | `make health` |
 
 ### Container Management
 

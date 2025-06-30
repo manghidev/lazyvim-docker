@@ -75,32 +75,30 @@ health_check() {
     
     # Check container status
     log_info "Checking container status..."
-    if docker compose ps | grep -q "$CONTAINER_NAME"; then
-        if docker compose ps | grep -q "Up"; then
-            log_success "Container is running"
-            
-            # Check container health
-            log_info "Checking container health..."
-            CONTAINER_STATUS=$(docker inspect "$CONTAINER_NAME" --format='{{.State.Status}}')
-            CONTAINER_HEALTH=$(docker inspect "$CONTAINER_NAME" --format='{{.State.Health.Status}}' 2>/dev/null || echo "No health check")
-            
-            echo "  Status: $CONTAINER_STATUS"
-            echo "  Health: $CONTAINER_HEALTH"
-            
-            # Check if we can execute commands in the container
-            if docker exec "$CONTAINER_NAME" echo "Container accessible" >/dev/null 2>&1; then
-                log_success "Container is accessible"
-            else
-                log_warning "Container is not accessible"
-            fi
-            
-        else
-            log_warning "Container exists but is not running"
-            echo "  Use 'make start' to start it"
-        fi
-    else
+    CONTAINER_STATE=$(docker inspect "$CONTAINER_NAME" 2>/dev/null | grep '"Status"' | cut -d'"' -f4 || echo "missing")
+    
+    if [ "$CONTAINER_STATE" = "missing" ]; then
         log_warning "Container does not exist"
         echo "  Use 'make build' to create it"
+    elif [ "$CONTAINER_STATE" = "running" ]; then
+        log_success "Container is running"
+        
+        # Check container health
+        log_info "Checking container health..."
+        CONTAINER_HEALTH=$(docker inspect "$CONTAINER_NAME" --format='{{.State.Health.Status}}' 2>/dev/null || echo "No health check")
+        
+        echo "  Status: $CONTAINER_STATE"
+        echo "  Health: $CONTAINER_HEALTH"
+        
+        # Check if we can execute commands in the container
+        if docker exec "$CONTAINER_NAME" echo "Container accessible" >/dev/null 2>&1; then
+            log_success "Container is accessible"
+        else
+            log_warning "Container is not accessible"
+        fi
+    else
+        log_warning "Container exists but is stopped ($CONTAINER_STATE)"
+        echo "  Use 'make start' to start it"
     fi
     
     print_separator
@@ -152,12 +150,17 @@ health_check() {
     # Final status
     log_info "Health check completed"
     
-    if docker compose ps | grep -q "Up"; then
+    FINAL_CONTAINER_STATE=$(docker inspect "$CONTAINER_NAME" 2>/dev/null | grep '"Status"' | cut -d'"' -f4 || echo "missing")
+    
+    if [ "$FINAL_CONTAINER_STATE" = "running" ]; then
         log_success "Environment is ready to use!"
-        echo "  Use 'make enter' or 'docker exec -it $CONTAINER_NAME zsh' to access"
+        echo "  Use 'make enter' to access the container"
+    elif [ "$FINAL_CONTAINER_STATE" = "missing" ]; then
+        log_info "Environment is not built"
+        echo "  Use 'make build' to create the container"
     else
         log_info "Environment is not running"
-        echo "  Use 'make start' to start or 'make build' to rebuild"
+        echo "  Use 'make start' to start the existing container"
     fi
 }
 

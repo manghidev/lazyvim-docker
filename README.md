@@ -118,7 +118,7 @@ lazyvim-docker/
 ├── docs/                   # Documentation
 │   ├── COMMANDS.md         # Complete command reference
 │   └── CHANGELOG.md        # Version history
-├── scripts/                # Internal scripts (use make commands instead)
+├── scripts/                # Internal scripts (always use make commands instead)
 │   ├── build.sh           # Build script
 │   ├── init.sh            # Init script
 │   ├── destroy.sh         # Destroy script
@@ -160,14 +160,9 @@ lazyvim-docker/
 
 ```bash
 make status               # Check container status
+make health               # Run comprehensive diagnostics
 make backup               # Backup configurations
 make clean                # Clean up Docker resources
-```
-
-For detailed diagnostics:
-```bash
-# Internal health check (comprehensive diagnostics)
-./scripts/health-check.sh
 ```
 
 ---

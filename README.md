@@ -35,6 +35,7 @@ make enter    # Enter the container
 
 ## 🎯 Main Commands
 
+### Local Commands (from project directory)
 ```bash
 make help          # Show all available commands
 make enter         # 🔥 DAILY USE: Enter container (starts automatically if stopped)
@@ -45,9 +46,68 @@ make build         # ⚠️  ONLY for first time or major updates
 make destroy       # ⚠️  DANGEROUS: Removes everything
 ```
 
-> 💡 **For daily development**: Just use `make enter` - it handles everything!
+### Global Commands (from anywhere)
+After running `make install-global`, you can use these commands from any directory:
+```bash
+lazy enter         # 🔥 Enter LazyVim from anywhere!
+lazy start         # Start the container
+lazy stop          # Stop the container  
+lazy status        # Check container status
+lazy health        # Run diagnostics
+lazy               # Show all available commands
+```
+
+> 💡 **For daily development**: Use `lazy enter` from anywhere - it handles everything!
+
+**Install global commands:**
+```bash
+# Run this once from the project directory
+make install-global
+```
 
 For detailed workflow and troubleshooting: **[📖 Container Lifecycle Guide](docs/CONTAINER_LIFECYCLE.md)**
+
+---
+
+## 🌍 Global Commands Setup
+
+You can install global commands to use LazyVim Docker from anywhere without navigating to the project directory.
+
+### Quick Setup
+```bash
+# From the lazyvim-docker directory
+make install-global
+
+# Reload your shell
+source ~/.zshrc    # or source ~/.bashrc
+```
+
+### Usage Examples
+```bash
+# Work from your Desktop
+cd ~/Desktop
+lazy enter          # Enter LazyVim instantly!
+
+# Check status from any project  
+cd ~/Projects/my-app
+lazy status         # Check if LazyVim is running
+
+# Start from anywhere
+lazy start          # Start the container
+lazy health         # Run full diagnostics
+```
+
+### Available Global Commands
+- `lazy enter` - Enter LazyVim (most used!)
+- `lazy start` - Start the container
+- `lazy stop` - Stop the container
+- `lazy status` - Check container status  
+- `lazy health` - Run health diagnostics
+- `lazy build` - Build/rebuild container
+- `lazy help` - Show all make commands
+- `lazy` - Show global commands help
+
+> 🚀 **Game Changer**: Once installed, just type `lazy enter` from anywhere and start coding!
 
 ---
 

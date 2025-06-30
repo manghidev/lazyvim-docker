@@ -35,13 +35,14 @@ LAZYVIM_DOCKER_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 log_info "LazyVim Docker Global Commands Installer"
 echo ""
 log_info "This will install global 'lazy' commands that you can use from anywhere:"
-echo "  lazy start    -> make start"
-echo "  lazy enter    -> make enter"
-echo "  lazy stop     -> make stop"
-echo "  lazy status   -> make status"
-echo "  lazy build    -> make build"
-echo "  lazy health   -> make health"
-echo "  lazy help     -> make help"
+echo "  lazy start      -> make start"
+echo "  lazy enter      -> make enter"
+echo "  lazy stop       -> make stop"
+echo "  lazy status     -> make status"
+echo "  lazy build      -> make build"
+echo "  lazy health     -> make health"
+echo "  lazy help       -> make help"
+echo "  lazy uninstall  -> Complete uninstall"
 echo ""
 
 # Check if we're in the correct directory
@@ -93,11 +94,13 @@ lazy() {
         echo "  logs      Show container logs"
         echo "  backup    Backup configurations"
         echo "  version   Show version"
+        echo "  uninstall Remove global commands"
         echo ""
         echo "Examples:"
         echo "  lazy enter     # Enter LazyVim from anywhere"
         echo "  lazy status    # Check container status"
         echo "  lazy health    # Run full diagnostics"
+        echo "  lazy uninstall # Remove global commands"
         echo ""
         return 0
     fi
@@ -110,6 +113,10 @@ lazy() {
             echo "🚀 Running: make \$cmd \$@"
             (cd "\$lazyvim_docker_path" && make "\$cmd" "\$@")
             ;;
+        uninstall)
+            echo "🗑️  Running uninstaller..."
+            (cd "\$lazyvim_docker_path" && bash uninstall-global-commands.sh)
+            ;;
         *)
             echo "❌ Unknown command: \$cmd"
             echo "💡 Use 'lazy' to see available commands"
@@ -120,7 +127,7 @@ lazy() {
 
 # Tab completion for lazy command
 _lazy_completion() {
-    local commands=(help start enter stop status health build restart destroy clean quick logs backup version)
+    local commands=(help start enter stop status health build restart destroy clean quick logs backup version uninstall)
     _describe 'commands' commands
 }
 
@@ -176,11 +183,13 @@ lazy() {
         echo "  logs      Show container logs"
         echo "  backup    Backup configurations"
         echo "  version   Show version"
+        echo "  uninstall Remove global commands"
         echo ""
         echo "Examples:"
         echo "  lazy enter     # Enter LazyVim from anywhere"
         echo "  lazy status    # Check container status"
         echo "  lazy health    # Run full diagnostics"
+        echo "  lazy uninstall # Remove global commands"
         echo ""
         return 0
     fi
@@ -193,6 +202,10 @@ lazy() {
             echo "🚀 Running: make \$cmd \$@"
             (cd "\$lazyvim_docker_path" && make "\$cmd" "\$@")
             ;;
+        uninstall)
+            echo "🗑️  Running uninstaller..."
+            (cd "\$lazyvim_docker_path" && bash uninstall-global-commands.sh)
+            ;;
         *)
             echo "❌ Unknown command: \$cmd"
             echo "💡 Use 'lazy' to see available commands"
@@ -204,7 +217,7 @@ lazy() {
 # Tab completion for lazy command (basic)
 _lazy_completion() {
     local cur="\${COMP_WORDS[COMP_CWORD]}"
-    local commands="help start enter stop status health build restart destroy clean quick logs backup version"
+    local commands="help start enter stop status health build restart destroy clean quick logs backup version uninstall"
     COMPREPLY=(\$(compgen -W "\$commands" -- "\$cur"))
 }
 

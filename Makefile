@@ -1,7 +1,7 @@
 # LazyVim Docker - Makefile
 # Provides easy-to-use commands for managing the LazyVim Docker environment
 
-.PHONY: help build start enter stop destroy clean status update logs backup restore dev quick version bump-version restart install-global
+.PHONY: help build start enter stop destroy clean status update logs backup restore dev quick version bump-version restart install-global uninstall
 
 # Default target
 .DEFAULT_GOAL := help
@@ -157,4 +157,8 @@ bump-version: ## Bump version (patch, minor, major)
 
 install-global: ## Install global 'lazy' commands to use from anywhere
 	@echo "$(BLUE)Installing LazyVim Docker global commands...$(NC)"
-	@./install-global-commands.sh
+	@./scripts/install-global-commands.sh
+
+uninstall: ## Uninstall LazyVim Docker and remove global commands
+	@echo "$(BLUE)Uninstalling LazyVim Docker...$(NC)"
+	@./scripts/uninstall-global-commands.sh

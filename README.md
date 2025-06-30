@@ -54,6 +54,7 @@ lazy start         # Start the container
 lazy stop          # Stop the container  
 lazy status        # Check container status
 lazy health        # Run diagnostics
+lazy uninstall     # Remove global commands
 lazy               # Show all available commands
 ```
 
@@ -105,9 +106,40 @@ lazy health         # Run full diagnostics
 - `lazy health` - Run health diagnostics
 - `lazy build` - Build/rebuild container
 - `lazy help` - Show all make commands
+- `lazy uninstall` - Remove global commands and optionally the project
 - `lazy` - Show global commands help
 
 > 🚀 **Game Changer**: Once installed, just type `lazy enter` from anywhere and start coding!
+
+### Uninstalling Global Commands
+
+If you want to remove the global commands:
+
+```bash
+# Option 1: Use the global uninstall command (from anywhere)
+lazy uninstall
+
+# Option 2: Use make from the project directory  
+make uninstall
+```
+
+The uninstaller will:
+- Remove the `lazy` command from your shell configuration
+- Optionally remove the entire project directory
+- Clean up Docker containers and images
+- Create backups of your shell config files
+
+#### Manual Cleanup
+If you need to manually remove the commands from your shell:
+```bash
+# Edit your shell config file
+nano ~/.zshrc    # or ~/.bashrc
+
+# Remove the section between these markers:
+# LazyVim Docker Global Commands - START
+# ... (remove everything between markers)
+# LazyVim Docker Global Commands - END
+```
 
 ---
 

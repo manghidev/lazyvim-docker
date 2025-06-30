@@ -86,6 +86,10 @@ clean: ## Clean up unused Docker resources
 	@docker volume prune -f
 	@echo "$(GREEN)Cleanup completed$(NC)"
 
+health: ## Run comprehensive health diagnostics
+	@echo "$(BLUE)Running LazyVim environment health check...$(NC)"
+	@./scripts/health-check.sh
+
 status: ## Show container status
 	@echo "$(BLUE)Container Status:$(NC)"
 	@CONTAINER_STATE=$$(docker inspect $(CONTAINER_NAME) 2>/dev/null | grep '"Status"' | cut -d'"' -f4 || echo "missing"); \

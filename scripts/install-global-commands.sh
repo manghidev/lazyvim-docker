@@ -109,7 +109,7 @@ lazy() {
     shift
     
     case "\$cmd" in
-        help|start|enter|stop|status|health|build|restart|destroy|clean|quick|logs|backup|version)
+        help|start|enter|stop|status|health|build|restart|destroy|clean|quick|logs|backup|configure|version)
             echo "🚀 Running: make \$cmd \$@"
             (cd "\$lazyvim_docker_path" && make "\$cmd" "\$@")
             ;;
@@ -127,7 +127,7 @@ lazy() {
 
 # Tab completion for lazy command
 _lazy_completion() {
-    local commands=(help start enter stop status health build restart destroy clean quick logs backup version uninstall)
+    local commands=(help start enter stop status health build restart destroy clean quick logs backup configure version uninstall)
     _describe 'commands' commands
 }
 
@@ -182,6 +182,7 @@ lazy() {
         echo "  quick     Quick start (build + enter)"
         echo "  logs      Show container logs"
         echo "  backup    Backup configurations"
+        echo "  configure Reconfigure directories and timezone"
         echo "  version   Show version"
         echo "  uninstall Remove global commands"
         echo ""
@@ -189,6 +190,7 @@ lazy() {
         echo "  lazy enter     # Enter LazyVim from anywhere"
         echo "  lazy status    # Check container status"
         echo "  lazy health    # Run full diagnostics"
+        echo "  lazy configure # Reconfigure directories and timezone"
         echo "  lazy uninstall # Remove global commands"
         echo ""
         return 0
@@ -198,7 +200,7 @@ lazy() {
     shift
     
     case "\$cmd" in
-        help|start|enter|stop|status|health|build|restart|destroy|clean|quick|logs|backup|version)
+        help|start|enter|stop|status|health|build|restart|destroy|clean|quick|logs|backup|configure|version)
             echo "🚀 Running: make \$cmd \$@"
             (cd "\$lazyvim_docker_path" && make "\$cmd" "\$@")
             ;;
@@ -217,7 +219,7 @@ lazy() {
 # Tab completion for lazy command (basic)
 _lazy_completion() {
     local cur="\${COMP_WORDS[COMP_CWORD]}"
-    local commands="help start enter stop status health build restart destroy clean quick logs backup version uninstall"
+    local commands="help start enter stop status health build restart destroy clean quick logs backup configure version uninstall"
     COMPREPLY=(\$(compgen -W "\$commands" -- "\$cur"))
 }
 

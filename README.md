@@ -213,7 +213,6 @@ curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scrip
 |--------|---------|----------|---------------|
 | **Remote Install** | `curl ... \| bash` | End users, daily use | ✅ `lazy` anywhere |
 | **Traditional** | `git clone ...` | Developers, customization | ❌ Must `cd` to directory |
-| **Quick Install** | `curl quick-install.sh` | Fast setup | ✅ `lazy` anywhere |
 
 ### Switching Between Methods
 
@@ -268,11 +267,46 @@ For detailed workflow and troubleshooting: **[📖 Container Lifecycle Guide](do
 
 ## 🔧 Advanced Configuration
 
-## 🔧 Advanced Configuration
+## 🔧 Configuration
 
-### Timezone Configuration
+### 🎯 Easy Configuration (Recommended)
+After installation, you can easily reconfigure directories and timezone:
+
+```bash
+# Reconfigure interactively - works from anywhere
+lazy configure
+
+# Traditional installation
+make configure    # (from project directory)
+```
+
+**What you can configure:**
+- ✅ **Timezone**: Automatically detects your system timezone with common options
+- ✅ **Directories**: Choose which local directories to mount in the container
+- ✅ **Projects Folder**: Set up your main development directory
+- ✅ **Custom Mounts**: Add any additional directories you need
+
+### 📁 Directory Configuration Examples
+
+**During `lazy configure` you can set up:**
+```bash
+# Common setups that will be offered
+~/Documents     → /home/developer/Documents    # Default
+~/Projects      → /home/developer/Projects     # Development projects
+~/Developer     → /home/developer/Developer    # macOS default
+~/Desktop       → /home/developer/Desktop      # Quick access files
+/Volumes/USB    → /home/developer/usb          # External drives
+```
+
+### 🕒 Timezone Configuration
 Configure your timezone in `docker-compose.yml`:
 
+**Automated (Easy):**
+```bash
+lazy configure    # Interactive timezone selection
+```
+
+**Manual (Traditional):**
 ```yaml
 services:
   code-editor:
@@ -283,15 +317,21 @@ services:
       - TZ=America/Mexico_City         # And this
 ```
 
-**Common timezones:** Mexico_City, New_York, Los_Angeles, Madrid, London, Tokyo
+**Common timezones:** 
+- `America/New_York` (EST/EDT)
+- `America/Los_Angeles` (PST/PDT) 
+- `America/Mexico_City` (CST/CDT)
+- `Europe/London` (GMT/BST)
+- `Europe/Madrid` (CET/CEST)
+- `Asia/Tokyo` (JST)
 
 **Apply changes:**
 ```bash
-lazy build    # Remote installation
+lazy build       # Remote installation
 make build       # Traditional installation
 ```
 
-### Volume Mounting
+### 📂 Advanced Volume Mounting
 Add your project directories in `docker-compose.yml`:
 
 ```yaml
@@ -299,6 +339,7 @@ volumes:
   - $HOME/Documents:/home/developer/Documents     # Default
   - $HOME/Projects:/home/developer/Projects       # Add this
   - $HOME/Developer:/home/developer/Developer     # Or this
+  - /path/to/custom:/home/developer/custom        # Custom paths
 ```
 
 ---
@@ -329,16 +370,11 @@ lazy uninstall && curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim
 
 ---
 
-## � Documentation & Support
+## 📑 Documentation & Support
 
 **Main Documentation:**
 - **[📖 Complete Commands Reference](docs/COMMANDS.md)** - All available commands
-- **[📝 Changelog](docs/CHANGELOG.md)** - Version history
-- **[� Container Lifecycle Guide](docs/CONTAINER_LIFECYCLE.md)** - Detailed workflows
-
-**Quick Start:**
-- Remote: `curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-install.sh | bash`
-- Traditional: `git clone ... && make quick`
+- **[🔁 Container Lifecycle Guide](docs/CONTAINER_LIFECYCLE.md)** - Detailed workflows
 
 **Support:**
 - 🐛 [Report Issues](https://github.com/manghidev/lazyvim-docker/issues)
@@ -358,45 +394,4 @@ lazy uninstall && curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim
 **Additional Resources:**
 - [LazyVim Docs](https://lazyvim.github.io/) | [Neovim Docs](https://neovim.io/doc/)
 - [Docker Docs](https://docs.docker.com/) | [Oh My Zsh](https://ohmyz.sh/)
-
----
-
-## 📚 Quick Reference
-
-### 🚀 Remote Scripts Commands
-
-| Action | Command | Description |
-|--------|---------|-------------|
-| **Install** | `curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-install.sh \| bash` | Complete setup |
-| **Update** | `lazy update` | Update to latest version |
-| **Uninstall** | `lazy uninstall` | Remove everything |
-
-### 💻 Daily Commands (After Remote Install)
-
-| Command | Description | Usage |
-|---------|-------------|-------|
-| `lazy enter` | Enter development environment | Daily coding |
-| `lazy status` | Check container status | Debugging |
-| `lazy start` | Start containers | If stopped |
-| `lazy stop` | Stop containers | End of day |
-| `lazy build` | Rebuild environment | After updates |
-| `lazy help` | Show all commands | Reference |
-
-### 🛠️ Troubleshooting Commands
-
-```bash
-# Check what's running
-lazy status
-
-# Full restart
-lazy stop && lazy start
-
-# Nuclear option - rebuild everything
-lazy build
-
-# Update to latest version
-lazy update
-
-# Complete removal
-lazy uninstall
-```
+- [Powerlevel10k Theme](https://github.com/romkatv/powerlevel10k) | [Zsh Plugins](https://github.com/ohmyzsh/ohmyzsh/wiki/Plugins)

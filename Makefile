@@ -1,7 +1,7 @@
 # LazyVim Docker - Makefile
 # Provides easy-to-use commands for managing the LazyVim Docker environment
 
-.PHONY: help build start enter stop destroy clean status update logs backup restore dev quick version bump-version restart install-global uninstall remote-install remote-uninstall remote-update
+.PHONY: help build start enter stop destroy clean status update logs backup restore dev quick version bump-version restart install-global uninstall remote-install remote-uninstall remote-update configure configure
 
 # Default target
 .DEFAULT_GOAL := help
@@ -183,3 +183,7 @@ test-remote-scripts: ## Test remote installation scripts locally
 	@bash -n scripts/remote-uninstall.sh && echo "$(GREEN)✓ remote-uninstall.sh syntax OK$(NC)"  
 	@bash -n scripts/remote-update.sh && echo "$(GREEN)✓ remote-update.sh syntax OK$(NC)"
 	@echo "$(GREEN)All remote scripts passed syntax check!$(NC)"
+
+configure: ## Reconfigure directories and timezone
+	@echo "$(BLUE)Reconfiguring LazyVim Docker environment...$(NC)"
+	@./scripts/configure.sh

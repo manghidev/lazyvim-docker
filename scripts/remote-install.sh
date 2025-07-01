@@ -225,18 +225,176 @@ add_to_path() {
     fi
 }
 
+# Configure timezone
+configure_timezone() {
+    print_step "Configuring timezone..."
+    
+    # Detect system timezone
+    local system_tz=""
+    if command -v timedatectl >/dev/null 2>&1; then
+        system_tz=$(timedatectl show --property=Timezone --value 2>/dev/null || echo "")
+    elif [[ -f /etc/timezone ]]; then
+        system_tz=$(cat /etc/timezone 2>/dev/null || echo "")
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        system_tz=$(ls -la /etc/localtime 2>/dev/null | sed 's/.*zoneinfo\///' || echo "")
+    fi
+    
+    # Default timezone if detection fails
+    local default_tz="${system_tz:-America/Mexico_City}"
+    
+    echo "Current system timezone detected: ${system_tz:-"Could not detect"}"
+    echo "Available timezone examples:"
+    echo "  - America/New_York"
+    echo "  - America/Los_Angeles"
+    echo "  - America/Mexico_City"
+    echo "  - Europe/London"
+    echo "  - Europe/Madrid"
+    echo "  - Asia/Tokyo"
+    echo ""
+    
+    read -p "Enter your timezone [$default_tz]: " user_tz
+    user_tz=${user_tz:-$default_tz}
+    
+    # Update timezone in docker-compose.yml
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        sed -i '' "s/TIMEZONE: .*/TIMEZONE: $user_tz/" docker-compose.yml
+        sed -i '' "s/TZ=.*/TZ=$user_tz/" docker-compose.yml
+    else
+        sed -i "s/TIMEZONE: .*/TIMEZONE: $user_tz/" docker-compose.yml
+        sed -i "s/TZ=.*/TZ=$user_tz/" docker-compose.yml
+    fi
+    
+    print_success "Timezone configured: $user_tz"
+}
+
+# Configure directories
+configure_directories() {
+    print_step "Configuring directories to mount..."
+    
+    # Detect OS
+    local os_type=""
+    local default_docs="$HOME/Documents"
+    local default_projects=""
+    
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        os_type="macOS"
+        default_projects="$HOME/Developer"
+    else
+        os_type="Linux"
+        default_projects="$HOME/Projects"
+    fi
+    
+    echo "Detected OS: $os_type"
+    echo "The container will mount directories so you can access your files inside the development environment."
+    echo ""
+    
+    # Configure Documents directory
+    echo "📁 Documents Directory:"
+    if [[ -d "$default_docs" ]]; then
+        read -p "Mount Documents directory ($default_docs)? (Y/n): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+            print_info "Documents directory will be mounted at /home/developer/Documents"
+        else
+            # Comment out the Documents line
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                sed -i '' 's|^      - \$HOME/Documents:|      # - \$HOME/Documents:|' docker-compose.yml
+            else
+                sed -i 's|^      - \$HOME/Documents:|      # - \$HOME/Documents:|' docker-compose.yml
+            fi
+            print_info "Documents directory mounting disabled"
+        fi
+    fi
+    
+    # Configure Projects directory
+    echo ""
+    echo "💻 Projects Directory:"
+    read -p "Do you want to mount a Projects directory? (Y/n): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+        read -p "Enter path to your projects directory [$default_projects]: " projects_dir
+        projects_dir=${projects_dir:-$default_projects}
+        
+        if [[ -d "$projects_dir" ]]; then
+            # Add projects directory to docker-compose.yml
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                sed -i '' "/\$HOME\/Documents:/a\\
+      - $projects_dir:/home/developer/Projects" docker-compose.yml
+            else
+                sed -i "/\$HOME\/Documents:/a\\
+      - $projects_dir:/home/developer/Projects" docker-compose.yml
+            fi
+            print_success "Projects directory added: $projects_dir -> /home/developer/Projects"
+        else
+            print_warning "Directory $projects_dir does not exist, you can add it later"
+        fi
+    fi
+    
+    # Configure additional directories
+    echo ""
+    echo "📂 Additional Directories:"
+    read -p "Do you want to mount any additional directories? (y/N): " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        local counter=1
+        while true; do
+            echo ""
+            read -p "Enter directory path (or 'done' to finish): " custom_dir
+            if [[ "$custom_dir" == "done" ]]; then
+                break
+            fi
+            
+            if [[ -d "$custom_dir" ]]; then
+                local mount_name=$(basename "$custom_dir")
+                read -p "Mount as [/home/developer/$mount_name]: " container_path
+                container_path=${container_path:-"/home/developer/$mount_name"}
+                
+                # Add custom directory to docker-compose.yml
+                if [[ "$OSTYPE" == "darwin"* ]]; then
+                    sed -i '' "/\$HOME\/Documents:/a\\
+      - $custom_dir:$container_path" docker-compose.yml
+                else
+                    sed -i "/\$HOME\/Documents:/a\\
+      - $custom_dir:$container_path" docker-compose.yml
+                fi
+                print_success "Added: $custom_dir -> $container_path"
+            else
+                print_warning "Directory $custom_dir does not exist, skipping"
+            fi
+            
+            counter=$((counter + 1))
+            if [[ $counter -gt 5 ]]; then
+                print_info "Maximum directories reached"
+                break
+            fi
+        done
+    fi
+    
+    print_success "Directory configuration completed"
+}
+
 # Initial setup
 initial_setup() {
     print_step "Running initial setup..."
     
     cd "$INSTALL_DIR"
     
+    echo ""
+    print_info "Let's configure your LazyVim Docker environment..."
+    echo ""
+    
+    # Ask for configuration
+    configure_timezone
+    echo ""
+    configure_directories
+    echo ""
+    
     # Build the Docker environment
     print_info "Building Docker environment (this may take a few minutes)..."
     if make build; then
         print_success "Docker environment built successfully"
     else
-        print_warning "Docker build failed, but installation completed. You can run 'lazyvim build' later."
+        print_warning "Docker build failed, but installation completed. You can run 'lazy build' later."
     fi
 }
 
@@ -272,6 +430,7 @@ main() {
     echo "  ${GREEN}lazy start${NC}     # Start the container"
     echo "  ${GREEN}lazy stop${NC}      # Stop the container"
     echo "  ${GREEN}lazy status${NC}    # Check container status"
+    echo "  ${GREEN}lazy configure${NC} # Reconfigure directories and timezone"
     echo "  ${GREEN}lazy update${NC}    # Update to latest version"
     echo "  ${GREEN}lazy uninstall${NC} # Uninstall everything"
     echo "  ${GREEN}lazy help${NC}      # Show all available commands"
@@ -279,6 +438,9 @@ main() {
     print_info "To get started:"
     echo "  1. Restart your terminal or run: ${YELLOW}source ~/.zshrc${NC} (or ~/.bashrc)"
     echo "  2. Run: ${GREEN}lazy enter${NC}"
+    echo ""
+    print_info "To reconfigure directories or timezone later:"
+    echo "  Run: ${GREEN}lazy configure${NC}"
     echo ""
     print_info "Happy coding! 🚀"
 }

@@ -190,6 +190,40 @@ create_global_commands() {
     print_success "Global 'lazy' command is now available"
 }
 
+# Check if we can do interactive input
+can_interact() {
+    if [[ -t 0 ]]; then
+        # stdin is a terminal
+        return 0
+    elif [[ -c /dev/tty ]] && exec < /dev/tty 2>/dev/null; then
+        # /dev/tty is available
+        return 0
+    else
+        # No interactive input possible
+        return 1
+    fi
+}
+
+# Safe interactive read
+safe_read() {
+    local prompt="$1"
+    local default="$2"
+    local result=""
+    
+    if can_interact; then
+        printf "%s" "$prompt"
+        if [[ -c /dev/tty ]]; then
+            read result </dev/tty 2>/dev/null || read result
+        else
+            read result
+        fi
+        echo "${result:-$default}"
+    else
+        print_warning "Running in non-interactive mode, using default: $default"
+        echo "$default"
+    fi
+}
+
 # Configure timezone
 configure_timezone() {
     print_step "Configuring timezone..."
@@ -217,9 +251,13 @@ configure_timezone() {
     echo "  - Asia/Tokyo"
     echo ""
     
-    printf "Enter your timezone [$default_tz]: "
-    read user_tz </dev/tty
-    user_tz=${user_tz:-$default_tz}
+    local user_tz
+    if can_interact; then
+        user_tz=$(safe_read "Enter your timezone [$default_tz]: " "$default_tz")
+    else
+        user_tz="$default_tz"
+        print_info "Using detected/default timezone: $user_tz"
+    fi
     
     # Update timezone in docker-compose.yml
     if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -254,11 +292,47 @@ configure_directories() {
     echo "The container will mount directories so you can access your files inside the development environment."
     echo ""
     
+    if ! can_interact; then
+        print_info "Running in non-interactive mode - using smart defaults:"
+        print_info "• Documents: $default_docs (if exists)"
+        print_info "• Projects: $default_projects (if exists)"
+        
+        # Configure Documents automatically if exists
+        if [[ -d "$default_docs" ]]; then
+            print_success "Documents directory will be mounted: $default_docs"
+        else
+            # Comment out the Documents line
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                sed -i '' 's|^      - \$HOME/Documents:|      # - \$HOME/Documents:|' docker-compose.yml
+            else
+                sed -i 's|^      - \$HOME/Documents:|      # - \$HOME/Documents:|' docker-compose.yml
+            fi
+            print_info "Documents directory not found, mounting disabled"
+        fi
+        
+        # Configure Projects automatically if exists
+        if [[ -d "$default_projects" ]]; then
+            # Add projects directory to docker-compose.yml
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                sed -i '' "/\$HOME\/Documents:/a\\
+      - $default_projects:/home/developer/Projects" docker-compose.yml
+            else
+                sed -i "/\$HOME\/Documents:/a\\
+      - $default_projects:/home/developer/Projects" docker-compose.yml
+            fi
+            print_success "Projects directory added: $default_projects"
+        else
+            print_info "Projects directory not found: $default_projects"
+        fi
+        
+        return
+    fi
+    
+    # Interactive mode
     # Configure Documents directory
     echo "📁 Documents Directory:"
     if [[ -d "$default_docs" ]]; then
-        printf "Mount Documents directory ($default_docs)? (Y/n): "
-        read -r reply </dev/tty
+        local reply=$(safe_read "Mount Documents directory ($default_docs)? (Y/n): " "Y")
         if [[ ! $reply =~ ^[Nn]$ ]]; then
             print_info "Documents directory will be mounted at /home/developer/Documents"
         else
@@ -275,12 +349,9 @@ configure_directories() {
     # Configure Projects directory
     echo ""
     echo "💻 Projects Directory:"
-    printf "Do you want to mount a Projects directory? (Y/n): "
-    read -r reply </dev/tty
+    local reply=$(safe_read "Do you want to mount a Projects directory? (Y/n): " "Y")
     if [[ ! $reply =~ ^[Nn]$ ]]; then
-        printf "Enter path to your projects directory [$default_projects]: "
-        read projects_dir </dev/tty
-        projects_dir=${projects_dir:-$default_projects}
+        local projects_dir=$(safe_read "Enter path to your projects directory [$default_projects]: " "$default_projects")
         
         if [[ -d "$projects_dir" ]]; then
             # Add projects directory to docker-compose.yml
@@ -300,22 +371,19 @@ configure_directories() {
     # Configure additional directories
     echo ""
     echo "📂 Additional Directories:"
-    printf "Do you want to mount any additional directories? (y/N): "
-    read -r reply </dev/tty
+    local reply=$(safe_read "Do you want to mount any additional directories? (y/N): " "N")
     if [[ $reply =~ ^[Yy]$ ]]; then
         local counter=1
         while true; do
             echo ""
-            printf "Enter directory path (or 'done' to finish): "
-            read custom_dir </dev/tty
+            local custom_dir=$(safe_read "Enter directory path (or 'done' to finish): " "done")
             if [[ "$custom_dir" == "done" ]]; then
                 break
             fi
             
             if [[ -d "$custom_dir" ]]; then
                 local mount_name=$(basename "$custom_dir")
-                printf "Mount as [/home/developer/$mount_name]: "
-                read container_path </dev/tty
+                local container_path=$(safe_read "Mount as [/home/developer/$mount_name]: " "/home/developer/$mount_name")
                 container_path=${container_path:-"/home/developer/$mount_name"}
                 
                 # Add custom directory to docker-compose.yml
@@ -374,8 +442,19 @@ cleanup() {
     print_success "Cleanup completed"
 }
 
+# Handle stdin for piped execution
+handle_stdin() {
+    # If we're being piped into, redirect stdin to terminal
+    if [[ ! -t 0 ]]; then
+        exec < /dev/tty 2>/dev/null || exec < /dev/stdin
+    fi
+}
+
 # Main installation process
 main() {
+    # Handle stdin redirection first
+    handle_stdin
+    
     print_header
     
     print_info "Starting LazyVim Docker remote installation..."

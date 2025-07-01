@@ -204,11 +204,11 @@ auto_configure() {
     
     # Update timezone in docker-compose.yml
     if [[ "$OSTYPE" == "darwin"* ]]; then
-        sed -i '' "s/TIMEZONE: .*/TIMEZONE: $default_tz/" docker-compose.yml
-        sed -i '' "s/TZ=.*/TZ=$default_tz/" docker-compose.yml
+        sed -i '' "s|TIMEZONE: .*|TIMEZONE: $default_tz|" docker-compose.yml
+        sed -i '' "s|TZ=.*|TZ=$default_tz|" docker-compose.yml
     else
-        sed -i "s/TIMEZONE: .*/TIMEZONE: $default_tz/" docker-compose.yml
-        sed -i "s/TZ=.*/TZ=$default_tz/" docker-compose.yml
+        sed -i "s|TIMEZONE: .*|TIMEZONE: $default_tz|" docker-compose.yml
+        sed -i "s|TZ=.*|TZ=$default_tz|" docker-compose.yml
     fi
     
     print_success "Timezone configured: $default_tz"

@@ -261,11 +261,11 @@ configure_timezone() {
     
     # Update timezone in docker-compose.yml
     if [[ "$OSTYPE" == "darwin"* ]]; then
-        sed -i '' "s/TIMEZONE: .*/TIMEZONE: $user_tz/" docker-compose.yml
-        sed -i '' "s/TZ=.*/TZ=$user_tz/" docker-compose.yml
+        sed -i '' "s|TIMEZONE: .*|TIMEZONE: $user_tz|" docker-compose.yml
+        sed -i '' "s|TZ=.*|TZ=$user_tz|" docker-compose.yml
     else
-        sed -i "s/TIMEZONE: .*/TIMEZONE: $user_tz/" docker-compose.yml
-        sed -i "s/TZ=.*/TZ=$user_tz/" docker-compose.yml
+        sed -i "s|TIMEZONE: .*|TIMEZONE: $user_tz|" docker-compose.yml
+        sed -i "s|TZ=.*|TZ=$user_tz|" docker-compose.yml
     fi
     
     print_success "Timezone configured: $user_tz"

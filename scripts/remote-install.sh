@@ -151,78 +151,26 @@ install_application() {
 
 # Create global commands
 create_global_commands() {
-    print_step "Creating global commands..."
+    print_step "Installing global commands..."
     
-    # Create the main lazy command
-    cat > "$BIN_DIR/lazy" << 'EOF'
-#!/bin/bash
-
-# LazyVim Docker - Global Command
-# This script provides global access to LazyVim Docker functionality
-
-LAZYVIM_INSTALL_DIR="$HOME/.local/share/lazyvim-docker"
-
-# Check if installation exists
-if [ ! -d "$LAZYVIM_INSTALL_DIR" ]; then
-    echo "❌ LazyVim Docker not found. Please reinstall:"
-    echo "   curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-install.sh | bash"
-    exit 1
-fi
-
-# Change to install directory and run make command
-cd "$LAZYVIM_INSTALL_DIR"
-
-# Handle special commands
-case "$1" in
-    uninstall)
-        echo "🗑️  Uninstalling LazyVim Docker..."
-        bash "$LAZYVIM_INSTALL_DIR/scripts/remote-uninstall.sh"
-        ;;
-    update)
-        echo "🔄 Updating LazyVim Docker..."
-        bash "$LAZYVIM_INSTALL_DIR/scripts/remote-update.sh"
-        ;;
-    *)
-        # Pass all other commands to make
-        make "$@"
-        ;;
-esac
-EOF
-
-    chmod +x "$BIN_DIR/lazy"
+    # Create bin directory if it doesn't exist
+    mkdir -p "$BIN_DIR"
     
-    # Add bin directory to PATH if not already there
-    add_to_path
-    
-    print_success "Global command 'lazy' created"
-}
-
-# Add bin directory to PATH
-add_to_path() {
-    local shell_config=""
-    local path_line="export PATH=\"\$HOME/.local/bin:\$PATH\""
-    
-    # Determine shell config file
-    if [[ -n "$ZSH_VERSION" ]]; then
-        shell_config="$HOME/.zshrc"
-    elif [[ -n "$BASH_VERSION" ]]; then
-        shell_config="$HOME/.bashrc"
-        # Also check .bash_profile on macOS
-        if [[ "$OSTYPE" == "darwin"* ]] && [[ -f "$HOME/.bash_profile" ]]; then
-            shell_config="$HOME/.bash_profile"
-        fi
+    # Run the installer script from the project
+    cd "$INSTALL_DIR"
+    chmod +x ./scripts/install-global-commands.sh
+    if ./scripts/install-global-commands.sh; then
+        print_success "Global commands installed successfully"
     else
-        # Default to .bashrc
-        shell_config="$HOME/.bashrc"
+        print_error "Failed to install global commands"
+        exit 1
     fi
     
-    # Add to PATH if not already there
-    if ! grep -q "$HOME/.local/bin" "$shell_config" 2>/dev/null; then
-        echo "" >> "$shell_config"
-        echo "# LazyVim Docker - Add local bin to PATH" >> "$shell_config"
-        echo "$path_line" >> "$shell_config"
-        print_info "Added $HOME/.local/bin to PATH in $shell_config"
-    fi
+    # Ensure .local/bin is in PATH for both shells
+    setup_local_bin_path "$HOME/.bashrc"
+    setup_local_bin_path "$HOME/.zshrc"
+    
+    print_success "Global 'lazy' command is now available"
 }
 
 # Configure timezone
@@ -252,7 +200,8 @@ configure_timezone() {
     echo "  - Asia/Tokyo"
     echo ""
     
-    read -p "Enter your timezone [$default_tz]: " user_tz
+    printf "Enter your timezone [$default_tz]: "
+    read user_tz
     user_tz=${user_tz:-$default_tz}
     
     # Update timezone in docker-compose.yml
@@ -291,9 +240,9 @@ configure_directories() {
     # Configure Documents directory
     echo "📁 Documents Directory:"
     if [[ -d "$default_docs" ]]; then
-        read -p "Mount Documents directory ($default_docs)? (Y/n): " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+        printf "Mount Documents directory ($default_docs)? (Y/n): "
+        read -r reply
+        if [[ ! $reply =~ ^[Nn]$ ]]; then
             print_info "Documents directory will be mounted at /home/developer/Documents"
         else
             # Comment out the Documents line
@@ -309,10 +258,11 @@ configure_directories() {
     # Configure Projects directory
     echo ""
     echo "💻 Projects Directory:"
-    read -p "Do you want to mount a Projects directory? (Y/n): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-        read -p "Enter path to your projects directory [$default_projects]: " projects_dir
+    printf "Do you want to mount a Projects directory? (Y/n): "
+    read -r reply
+    if [[ ! $reply =~ ^[Nn]$ ]]; then
+        printf "Enter path to your projects directory [$default_projects]: "
+        read projects_dir
         projects_dir=${projects_dir:-$default_projects}
         
         if [[ -d "$projects_dir" ]]; then
@@ -333,20 +283,22 @@ configure_directories() {
     # Configure additional directories
     echo ""
     echo "📂 Additional Directories:"
-    read -p "Do you want to mount any additional directories? (y/N): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
+    printf "Do you want to mount any additional directories? (y/N): "
+    read -r reply
+    if [[ $reply =~ ^[Yy]$ ]]; then
         local counter=1
         while true; do
             echo ""
-            read -p "Enter directory path (or 'done' to finish): " custom_dir
+            printf "Enter directory path (or 'done' to finish): "
+            read custom_dir
             if [[ "$custom_dir" == "done" ]]; then
                 break
             fi
             
             if [[ -d "$custom_dir" ]]; then
                 local mount_name=$(basename "$custom_dir")
-                read -p "Mount as [/home/developer/$mount_name]: " container_path
+                printf "Mount as [/home/developer/$mount_name]: "
+                read container_path
                 container_path=${container_path:-"/home/developer/$mount_name"}
                 
                 # Add custom directory to docker-compose.yml

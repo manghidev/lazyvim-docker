@@ -103,11 +103,13 @@ remove_global_commands() {
 remove_project_directory() {
     local project_dir
     project_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    # Get parent directory (remove /scripts)
+    project_dir="$(dirname "$project_dir")"
     
     echo
     print_status "Current project directory: $project_dir"
     echo
-    echo -n "Do you want to remove the entire LazyVim Docker project directory? [y/N]: "
+    printf "Do you want to remove the entire LazyVim Docker project directory? [y/N]: "
     read -r response
     
     case "$response" in

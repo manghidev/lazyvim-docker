@@ -96,6 +96,40 @@ remove_installation() {
     fi
 }
 
+# Remove global commands from shell configurations
+remove_shell_commands() {
+    print_step "Removing global commands from shell configurations..."
+    
+    local configs=("$HOME/.bashrc" "$HOME/.zshrc" "$HOME/.bash_profile")
+    local marker_start="# LazyVim Docker Global Commands - START"
+    local marker_end="# LazyVim Docker Global Commands - END"
+    local removed_any=false
+    
+    for config in "${configs[@]}"; do
+        if [[ -f "$config" ]] && grep -q "$marker_start" "$config" 2>/dev/null; then
+            print_info "Removing commands from: $config"
+            
+            # Create backup
+            cp "$config" "${config}.backup.$(date +%Y%m%d-%H%M%S)"
+            
+            # Remove the section between markers
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                sed -i '' "/$marker_start/,/$marker_end/d" "$config"
+            else
+                sed -i "/$marker_start/,/$marker_end/d" "$config"
+            fi
+            
+            removed_any=true
+        fi
+    done
+    
+    if [[ "$removed_any" == true ]]; then
+        print_success "Global commands removed from shell configurations"
+    else
+        print_info "No global commands found in shell configurations"
+    fi
+}
+
 # Remove global command
 remove_global_command() {
     print_step "Removing global command..."
@@ -111,7 +145,7 @@ remove_global_command() {
 # Remove PATH modifications (optional)
 remove_path_modifications() {
     echo ""
-    echo -n "Do you want to remove PATH modifications from shell config? [y/N]: "
+    printf "Do you want to remove PATH modifications from shell config? [y/N]: "
     read -r response
     
     case "$response" in
@@ -151,7 +185,7 @@ confirm_uninstall() {
     echo "  • Global 'lazy' command"
     echo "  • All data and configurations"
     echo ""
-    echo -n "Are you sure you want to continue? [y/N]: "
+    printf "Are you sure you want to continue? [y/N]: "
     read -r response
     
     case "$response" in
@@ -177,6 +211,7 @@ main() {
     cleanup_docker
     remove_installation
     remove_global_command
+    remove_shell_commands
     remove_path_modifications
     
     echo ""

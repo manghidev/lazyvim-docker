@@ -55,7 +55,7 @@ test_configure_timezone() {
     echo ""
     
     printf "Enter your timezone [$default_tz]: "
-    read user_tz
+    read user_tz </dev/tty
     user_tz=${user_tz:-$default_tz}
     
     print_success "Timezone selected: $user_tz"
@@ -86,7 +86,7 @@ test_configure_directories() {
     echo "📁 Documents Directory:"
     if [[ -d "$default_docs" ]]; then
         printf "Mount Documents directory ($default_docs)? (Y/n): "
-        read -r reply
+        read -r reply </dev/tty
         if [[ ! $reply =~ ^[Nn]$ ]]; then
             print_info "Documents directory would be mounted at /home/developer/Documents"
         else
@@ -98,10 +98,10 @@ test_configure_directories() {
     echo ""
     echo "💻 Projects Directory:"
     printf "Do you want to mount a Projects directory? (Y/n): "
-    read -r reply
+    read -r reply </dev/tty
     if [[ ! $reply =~ ^[Nn]$ ]]; then
         printf "Enter path to your projects directory [$default_projects]: "
-        read projects_dir
+        read projects_dir </dev/tty
         projects_dir=${projects_dir:-$default_projects}
         
         if [[ -d "$projects_dir" ]]; then
@@ -115,12 +115,12 @@ test_configure_directories() {
     echo ""
     echo "📂 Additional Directories:"
     printf "Do you want to mount any additional directories? (y/N): "
-    read -r reply
+    read -r reply </dev/tty
     if [[ $reply =~ ^[Yy]$ ]]; then
         while true; do
             echo ""
             printf "Enter directory path (or 'done' to finish): "
-            read custom_dir
+            read custom_dir </dev/tty
             if [[ "$custom_dir" == "done" ]]; then
                 break
             fi
@@ -128,7 +128,7 @@ test_configure_directories() {
             if [[ -d "$custom_dir" ]]; then
                 local mount_name=$(basename "$custom_dir")
                 printf "Mount as [/home/developer/$mount_name]: "
-                read container_path
+                read container_path </dev/tty
                 container_path=${container_path:-"/home/developer/$mount_name"}
                 print_success "Would mount: $custom_dir -> $container_path"
             else

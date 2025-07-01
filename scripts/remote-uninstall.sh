@@ -146,7 +146,7 @@ remove_global_command() {
 remove_path_modifications() {
     echo ""
     printf "Do you want to remove PATH modifications from shell config? [y/N]: "
-    read -r response
+    read -r response </dev/tty
     
     case "$response" in
         [yY][eE][sS]|[yY])
@@ -186,7 +186,7 @@ confirm_uninstall() {
     echo "  • All data and configurations"
     echo ""
     printf "Are you sure you want to continue? [y/N]: "
-    read -r response
+    read -r response </dev/tty
     
     case "$response" in
         [yY][eE][sS]|[yY])

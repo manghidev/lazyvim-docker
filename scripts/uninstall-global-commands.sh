@@ -110,7 +110,7 @@ remove_project_directory() {
     print_status "Current project directory: $project_dir"
     echo
     printf "Do you want to remove the entire LazyVim Docker project directory? [y/N]: "
-    read -r response
+    read -r response </dev/tty
     
     case "$response" in
         [yY][eE][sS]|[yY])

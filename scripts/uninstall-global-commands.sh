@@ -114,12 +114,12 @@ remove_project_directory() {
             print_status "Removing project directory: $project_dir"
             
             # Stop and remove containers first
-            if command -v docker-compose >/dev/null 2>&1 || command -v docker >/dev/null 2>&1; then
+            if command -v docker >/dev/null 2>&1; then
                 print_status "Stopping and removing Docker containers..."
                 cd "$project_dir"
                 make destroy 2>/dev/null || {
                     print_warning "Could not run 'make destroy'. Attempting manual cleanup..."
-                    docker-compose down -v 2>/dev/null || docker compose down -v 2>/dev/null || true
+                    docker compose down -v 2>/dev/null || true
                     docker rmi lazyvim-docker_code-editor 2>/dev/null || true
                 }
             fi

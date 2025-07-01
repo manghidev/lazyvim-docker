@@ -149,6 +149,23 @@ install_application() {
     print_success "Application installed to $INSTALL_DIR"
 }
 
+# Setup PATH for local bin directory
+setup_local_bin_path() {
+    local shell_config="$1"
+    local path_line="export PATH=\"\$HOME/.local/bin:\$PATH\""
+    
+    # Create config file if it doesn't exist
+    touch "$shell_config"
+    
+    # Add to PATH if not already there
+    if ! grep -q "$HOME/.local/bin" "$shell_config" 2>/dev/null; then
+        echo "" >> "$shell_config"
+        echo "# LazyVim Docker - Add local bin to PATH" >> "$shell_config"
+        echo "$path_line" >> "$shell_config"
+        print_info "Added $HOME/.local/bin to PATH in $shell_config"
+    fi
+}
+
 # Create global commands
 create_global_commands() {
     print_step "Installing global commands..."

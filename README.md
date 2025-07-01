@@ -6,12 +6,24 @@ A professional Dockerized environment for LazyVim (advanced Neovim configuration
 
 ## 🚀 Quick Start
 
-### One-Line Installation (Recommended)
+### 🌐 Remote Installation (Recommended)
+Install directly without cloning the repository - no manual setup needed:
+
+```bash
+# One-line installation
+curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-install.sh | bash
+
+# Then use from anywhere
+lazy enter      # Enter LazyVim development environment
+```
+
+### 📦 Traditional Installation
+If you prefer to clone the repository manually:
 ```bash
 git clone https://github.com/manghidev/lazyvim-docker.git && cd lazyvim-docker && make quick
 ```
 
-### Manual Installation
+### 🔧 Manual Installation
 ```bash
 git clone https://github.com/manghidev/lazyvim-docker.git
 cd lazyvim-docker
@@ -27,14 +39,31 @@ make enter    # Enter the container
 - **Dockerized**: Fully isolated and reproducible environment
 - **Rich Terminal**: Zsh with Oh My Zsh, Powerlevel10k theme, and useful plugins
 - **40+ Developer Tools**: git, lazygit, tmux, python, node.js, and many more
-- **Easy Management**: Simple make commands for all operations
+- **Easy Remote Setup**: No need to clone repository manually - just one command
+- **Simple Management**: Easy commands for all operations
 - **Persistent Configuration**: All changes are saved between sessions
 - **Cross-Platform**: Works on macOS and Linux
+- **Auto-Updates**: Built-in update mechanism
 
 ---
 
-## 🎯 Main Commands
+## 🎯 Commands Overview
 
+### 🌐 Global Commands (Remote Installation)
+After remote installation, use these commands from anywhere:
+```bash
+lazy enter      # 🔥 Enter LazyVim development environment
+lazy start      # Start the container
+lazy stop       # Stop the container
+lazy status     # Check container status
+lazy build      # Build/rebuild environment
+lazy update     # Update to latest version
+lazy uninstall  # Complete removal
+lazy help       # Show all available commands
+```
+
+### 📁 Local Commands (Traditional Installation)
+From the project directory:
 ```bash
 make help          # Show all available commands
 make enter         # 🔥 DAILY USE: Enter container (starts automatically if stopped)
@@ -45,240 +74,324 @@ make build         # ⚠️  ONLY for first time or major updates
 make destroy       # ⚠️  DANGEROUS: Removes everything
 ```
 
-> 💡 **For daily development**: Just use `make enter` - it handles everything!
+> 💡 **For daily development**: Use `lazy enter` (remote) or `make enter` (traditional)
+
+---
+
+## 🌐 Remote Installation Scripts
+
+LazyVim Docker provides three main remote scripts for easy management:
+
+### 📥 Installation Script
+**`remote-install.sh`** - Complete setup in one command
+
+```bash
+# Full installation with Docker build
+curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-install.sh | bash
+```
+
+**What it does:**
+- ✅ Checks system requirements (Docker, git, curl)
+- ✅ Downloads LazyVim Docker to `~/.local/share/lazyvim-docker`
+- ✅ Creates global `lazy` command in `~/.local/bin`
+- ✅ Adds `~/.local/bin` to your PATH automatically
+- ✅ Builds Docker environment (may take a few minutes)
+- ✅ Creates shell configuration backups
+
+### 🔄 Update Script
+**`remote-update.sh`** - Keep your installation up to date
+
+```bash
+# Update to latest version
+lazy update
+
+# Or run directly
+curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-update.sh | bash
+```
+
+**What it does:**
+- ✅ Checks current vs latest version
+- ✅ Creates backup of current installation
+- ✅ Downloads latest version
+- ✅ Preserves user configurations (.dotfiles, backups)
+- ✅ Updates installation while keeping your settings
+- ✅ Optionally rebuilds Docker containers
+
+### 🗑️ Uninstallation Script
+**`remote-uninstall.sh`** - Complete cleanup
+
+```bash
+# Uninstall everything with prompts
+lazy uninstall
+
+# Or run directly
+curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-uninstall.sh | bash
+```
+
+**What it does:**
+- ✅ Stops and removes Docker containers/images
+- ✅ Removes installation directory (`~/.local/share/lazyvim-docker`)
+- ✅ Removes global `lazy` command
+- ✅ Optionally cleans PATH modifications from shell configs
+- ✅ Creates backups before making changes
+- ✅ Interactive prompts for safety
+
+---
+
+## 🔬 Script Details & Technical Info
+
+### 📥 remote-install.sh
+**Purpose**: Complete LazyVim Docker setup without repository cloning
+
+**Requirements Check:**
+- Docker (with compose support)
+- Git (for downloading)
+- Curl (for execution)
+- Supported OS: macOS, Linux
+
+**Installation Process:**
+1. Creates `~/.local/share/lazyvim-docker` directory
+2. Downloads latest repository to temp location
+3. Moves files to installation directory
+4. Creates global `lazy` command in `~/.local/bin`
+5. Updates shell PATH in `.zshrc`/`.bashrc`
+6. Builds Docker environment (5-10 minutes)
+7. Cleans up temporary files
+
+**Files Modified:**
+- `~/.zshrc` or `~/.bashrc` (adds PATH)
+- Creates `~/.local/bin/lazy`
+- Creates `~/.local/share/lazyvim-docker/`
+
+### 🔄 remote-update.sh
+**Purpose**: Update existing remote installation to latest version
+
+**Update Process:**
+1. Checks current version vs latest GitHub release
+2. Creates backup of current installation
+3. Downloads latest version to temp directory
+4. Preserves user configurations (.dotfiles, backups)
+5. Replaces system files while keeping user data
+6. Optionally rebuilds Docker containers
+7. Cleans up temporary files
+
+**Preserved Data:**
+- `.dotfiles/` (your Neovim, shell configs)
+- `backups/` (configuration backups)
+- Docker volumes (development data)
+
+**Safe Rollback:**
+- Backup created before update in `~/.local/share/lazyvim-docker-backup-[timestamp]`
+
+### 🗑️ remote-uninstall.sh
+**Purpose**: Complete removal of LazyVim Docker installation
+
+**Removal Process:**
+1. Stops all running containers
+2. Removes Docker containers and images
+3. Removes Docker volumes
+4. Removes installation directory
+5. Removes global `lazy` command
+6. Optionally cleans PATH from shell configs
+7. Creates backups before deletion
+
+**Interactive Prompts:**
+- Confirm complete uninstall
+- Choose to remove PATH modifications
+- Option to keep or remove project files
+
+**Cleanup Scope:**
+- Docker: containers, images, volumes
+- Files: installation directory, global command
+- Config: PATH modifications (optional)
+
+---
+
+## 📋 Installation Methods Comparison
+
+| Method | Command | Best For | Global Access |
+|--------|---------|----------|---------------|
+| **Remote Install** | `curl ... \| bash` | End users, daily use | ✅ `lazy` anywhere |
+| **Traditional** | `git clone ...` | Developers, customization | ❌ Must `cd` to directory |
+
+### Switching Between Methods
+
+**From Traditional to Remote:**
+```bash
+# From your existing repo directory
+make destroy && cd .. && rm -rf lazyvim-docker
+curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-install.sh | bash
+```
+
+**From Remote to Traditional:**
+```bash
+lazy uninstall
+git clone https://github.com/manghidev/lazyvim-docker.git && cd lazyvim-docker && make quick
+```
+
+---
+
+## 🎯 Daily Usage Guide
+
+### Remote Installation Workflow (Recommended)
+```bash
+# 1. Install once (5-10 minutes)
+curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-install.sh | bash
+
+# 2. Daily usage from anywhere
+cd ~/Projects/my-project
+lazy enter       # Start coding immediately
+
+# 3. Management commands
+lazy status      # Check if running
+lazy stop        # Stop when done
+lazy update      # Update weekly/monthly
+```
+
+### Traditional Installation Workflow
+```bash
+# 1. Install once
+git clone https://github.com/manghidev/lazyvim-docker.git && cd lazyvim-docker && make quick
+
+# 2. Daily usage (must be in project directory)
+cd path/to/lazyvim-docker
+make enter          # Start coding
+
+# 3. Management
+make status && make stop
+```
 
 For detailed workflow and troubleshooting: **[📖 Container Lifecycle Guide](docs/CONTAINER_LIFECYCLE.md)**
 
 ---
 
+## 🔧 Advanced Configuration
+
 ## 🔧 Configuration
 
-### Timezone Configuration
-Configure your local timezone to match the container time. Edit the `docker-compose.yml` file:
+### 🎯 Easy Configuration (Recommended)
+After installation, you can easily reconfigure directories and timezone:
 
+```bash
+# Reconfigure interactively - works from anywhere
+lazy configure
+
+# Traditional installation
+make configure    # (from project directory)
+```
+
+**What you can configure:**
+- ✅ **Timezone**: Automatically detects your system timezone with common options
+- ✅ **Directories**: Choose which local directories to mount in the container
+- ✅ **Projects Folder**: Set up your main development directory
+- ✅ **Custom Mounts**: Add any additional directories you need
+
+### 📁 Directory Configuration Examples
+
+**During `lazy configure` you can set up:**
+```bash
+# Common setups that will be offered
+~/Documents     → /home/developer/Documents    # Default
+~/Projects      → /home/developer/Projects     # Development projects
+~/Developer     → /home/developer/Developer    # macOS default
+~/Desktop       → /home/developer/Desktop      # Quick access files
+/Volumes/USB    → /home/developer/usb          # External drives
+```
+
+### 🕒 Timezone Configuration
+Configure your timezone in `docker-compose.yml`:
+
+**Automated (Easy):**
+```bash
+lazy configure    # Interactive timezone selection
+```
+
+**Manual (Traditional):**
 ```yaml
-# In docker-compose.yml, modify these lines:
 services:
   code-editor:
     build:
       args:
-        VERSION: x.x.x
-        TIMEZONE: America/Mexico_City  # Change to your timezone
+        TIMEZONE: America/Mexico_City  # Change this
     environment:
-      - TZ=America/Mexico_City         # Change to your timezone
+      - TZ=America/Mexico_City         # And this
 ```
 
-Common timezones:
-- `America/Mexico_City` (UTC-6)
-- `America/New_York` (UTC-5/-4)
-- `America/Los_Angeles` (UTC-8/-7)
-- `Europe/Madrid` (UTC+1/+2)
-- `Europe/London` (UTC+0/+1)
-- `Asia/Tokyo` (UTC+9)
+**Common timezones:** 
+- `America/New_York` (EST/EDT)
+- `America/Los_Angeles` (PST/PDT) 
+- `America/Mexico_City` (CST/CDT)
+- `Europe/London` (GMT/BST)
+- `Europe/Madrid` (CET/CEST)
+- `Asia/Tokyo` (JST)
 
-After changing the timezone, rebuild the container:
+**Apply changes:**
 ```bash
-make build
+lazy build       # Remote installation
+make build       # Traditional installation
 ```
 
-Check the current timezone configuration:
-```bash
-make timezone
-```
-
-### Volume Mounting
-By default, your `Documents` folder is mounted. Edit `docker-compose.yml` to add more directories:
+### 📂 Advanced Volume Mounting
+Add your project directories in `docker-compose.yml`:
 
 ```yaml
 volumes:
-  # Already included
-  - $HOME/Documents:/home/developer/Documents
-  
-  # Add your project directories
-  - $HOME/Projects:/home/developer/Projects
-  - $HOME/Developer:/home/developer/Developer
+  - $HOME/Documents:/home/developer/Documents     # Default
+  - $HOME/Projects:/home/developer/Projects       # Add this
+  - $HOME/Developer:/home/developer/Developer     # Or this
+  - /path/to/custom:/home/developer/custom        # Custom paths
 ```
 
-### Initial Setup
-Run the interactive setup for personalized configuration:
+---
+
+## 🩺 Maintenance & Troubleshooting
+
+### Health Check Commands
 ```bash
-make build  # First build the environment
+lazy status     # Container status
+lazy help       # Available commands  
+make health        # Comprehensive diagnostics (traditional)
 ```
 
----
-
-## 📁 Project Structure
-
-```
-lazyvim-docker/
-├── Makefile                 # Main command interface
-├── docker-compose.yml       # Docker configuration
-├── Dockerfile              # Container definition
-├── VERSION                 # Current version
-├── docs/                   # Documentation
-│   ├── COMMANDS.md         # Complete command reference
-│   └── CHANGELOG.md        # Version history
-├── scripts/                # Internal scripts (always use make commands instead)
-│   ├── build.sh           # Build script
-│   ├── init.sh            # Init script
-│   ├── destroy.sh         # Destroy script
-│   ├── setup.sh           # Interactive setup
-│   ├── health-check.sh    # Environment diagnostics
-│   └── bump-version.sh    # Version management
-└── .dotfiles/             # Persistent configuration
-    ├── .zshrc            # Shell configuration
-    ├── .p10k.zsh         # Theme configuration
-    └── .config/          # App configurations
-        ├── nvim/         # Neovim/LazyVim
-        └── lazygit/      # Git TUI
-```
-
----
-
-## 🛠️ Included Tools
-
-**Core Development:**
-- Neovim with LazyVim configuration
-- Git + Lazygit (Git TUI)
-- Node.js LTS + npm
-- Python 3 + pip with dev packages
-
-**Terminal Enhancement:**
-- Zsh with Oh My Zsh + Powerlevel10k
-- fzf (fuzzy finder), ripgrep (fast search)
-- bat (better cat), exa (better ls), fd (better find)
-- tmux (terminal multiplexer)
-
-**System Tools:**
-- htop, tree, curl, wget
-- make, cmake, g++
-- jq, yq (JSON/YAML processors)
-
----
-
-## 🩺 Health & Maintenance
-
+### Common Solutions
 ```bash
-make status               # Check container status
-make health               # Run comprehensive diagnostics
-make backup               # Backup configurations
-make clean                # Clean up Docker resources
+# Container won't start
+lazy stop && lazy start
+
+# Need fresh environment
+lazy build
+
+# Update to fix issues
+lazy update
+
+# Nuclear option
+lazy uninstall && curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-install.sh | bash
 ```
 
 ---
 
-## 🔄 Version Management
+## 📑 Documentation & Support
 
-```bash
-make version                    # Show current version
-make bump-version TYPE=patch    # Bump version (patch/minor/major)
-```
+**Main Documentation:**
+- **[📖 Complete Commands Reference](docs/COMMANDS.md)** - All available commands
+- **[🔁 Container Lifecycle Guide](docs/CONTAINER_LIFECYCLE.md)** - Detailed workflows
 
----
-
-## 🐛 Troubleshooting
-
-**Container won't start:**
-```bash
-make status       # Check what's wrong
-make destroy      # Nuclear option: rebuild everything
-make build
-```
-
-**Need fresh start:**
-```bash
-make destroy && make build
-```
-
-**Performance issues:**
-```bash
-make clean        # Free up disk space
-```
+**Support:**
+- 🐛 [Report Issues](https://github.com/manghidev/lazyvim-docker/issues)
+- 💡 [Feature Requests](https://github.com/manghidev/lazyvim-docker/issues)
+- ⭐ [Star the Project](https://github.com/manghidev/lazyvim-docker)
 
 ---
 
-## 📚 Documentation
+## 👨‍💻 About
 
-- **[📖 Complete Commands Reference](docs/COMMANDS.md)** - All available commands and workflows
-- **[📝 Changelog](docs/CHANGELOG.md)** - Version history and updates
+**Created by ManghiDev**  
+🌐 [Personal Website](https://manghi.dev)  
+📧 [GitHub Issues](https://github.com/manghidev/lazyvim-docker/issues)
 
----
+**License:** MIT - See [LICENSE](LICENSE) file
 
-**Ready to code? Run `make quick` and start developing! 🚀**
-
-## 💡 Usage Tips
-
-### First Time Setup
-1. Run the container: `make build`
-2. Configure Powerlevel10k theme: `p10k configure`
-3. Customize Neovim as needed
-4. Set up git: `git config --global user.name "Your Name"`
-
-### Daily Workflow
-1. Start container: `make start` or `make enter`
-2. Work on your projects in mounted directories
-3. All changes in .dotfiles are persisted
-4. Stop when done: `make stop`
-
-### Accessing Your Files
-- Documents: `/home/developer/Documents`
-- Projects: `/home/developer/Projects` (if configured)
-- Custom mounts: As configured in docker-compose.yml
-
-### Terminal Features
-- **Auto-suggestions**: Start typing, get suggestions from history
-- **Syntax highlighting**: Commands are highlighted as you type
-- **Fast search**: Use `Ctrl+R` for history search with fzf
-- **Git integration**: Lazygit with `lg` command or `lazygit`
-
----
-
-## 🤝 Contributions
-
-Contributions are welcome! Here's how you can help:
-
-1. **Fork** the repository
-2. **Create** a feature branch: `git checkout -b feature/amazing-feature`
-3. **Commit** your changes: `git commit -m 'Add amazing feature'`
-4. **Push** to the branch: `git push origin feature/amazing-feature`
-5. **Open** a Pull Request
-
-### Development Guidelines
-- Follow existing code style
-- Add appropriate documentation
-- Test your changes
-- Update version number if needed
-
----
-
-## 📝 License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
-
----
-
-## 👨‍💻 Author
-
-Created by **ManghiDev**  
-🌐 Website: [Personal Web](https://manghi.dev)  
-📧 Contact: [GitHub Issues](https://github.com/manghidev/lazyvim-docker/issues)
-
----
-
-## ⭐ Support
-
-If you find this project helpful, please consider:
-- ⭐ Starring the repository
-- 🐛 Reporting bugs
-- 💡 Suggesting new features
-- 📖 Improving documentation
-
----
-
-## 📚 Additional Resources
-
-- [LazyVim Documentation](https://lazyvim.github.io/)
-- [Neovim Documentation](https://neovim.io/doc/)
-- [Docker Documentation](https://docs.docker.com/)
-- [Oh My Zsh Documentation](https://ohmyz.sh/)
-- [Powerlevel10k Documentation](https://github.com/romkatv/powerlevel10k)
+**Additional Resources:**
+- [LazyVim Docs](https://lazyvim.github.io/) | [Neovim Docs](https://neovim.io/doc/)
+- [Docker Docs](https://docs.docker.com/) | [Oh My Zsh](https://ohmyz.sh/)
+- [Powerlevel10k Theme](https://github.com/romkatv/powerlevel10k) | [Zsh Plugins](https://github.com/ohmyzsh/ohmyzsh/wiki/Plugins)

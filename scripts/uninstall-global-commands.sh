@@ -53,8 +53,9 @@ remove_from_config() {
     print_status "Removing LazyVim Docker commands from $config_file..."
     
     # Create a backup
-    cp "$config_file" "${config_file}.bak.$(date +%Y%m%d-%H%M%S)"
-    print_status "Backup created: ${config_file}.bak.$(date +%Y%m%d-%H%M%S)"
+    local timestamp="$(date +%Y%m%d-%H%M%S)"
+    cp "$config_file" "${config_file}.bak.$timestamp"
+    print_status "Backup created: ${config_file}.bak.$timestamp"
     
     # Remove the section between markers (including the markers)
     if sed -i.tmp "/$START_MARKER/,/$END_MARKER/d" "$config_file" 2>/dev/null; then

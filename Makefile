@@ -86,6 +86,10 @@ clean: ## Clean up unused Docker resources
 	@docker volume prune -f
 	@echo "$(GREEN)Cleanup completed$(NC)"
 
+configure: ## Reconfigure directories and timezone
+	@echo "$(BLUE)Reconfiguring LazyVim Docker environment...$(NC)"
+	@./scripts/configure.sh
+
 health: ## Run comprehensive health diagnostics
 	@echo "$(BLUE)Running LazyVim environment health check...$(NC)"
 	@./scripts/health-check.sh
@@ -159,11 +163,11 @@ install-global: ## Install global 'lazy' commands to use from anywhere
 	@echo "$(BLUE)Installing LazyVim Docker global commands...$(NC)"
 	@./scripts/install-global-commands.sh
 
-uninstall: ## Uninstall LazyVim Docker and remove global commands
+uninstall:
 	@echo "$(BLUE)Uninstalling LazyVim Docker...$(NC)"
 	@./scripts/uninstall-global-commands.sh
 
-install-remote: ## Show remote installation command
+install-remote:
 	@echo "$(BLUE)LazyVim Docker - Remote Installation$(NC)"
 	@echo ""
 	@echo "To install LazyVim Docker remotely (recommended):"
@@ -175,15 +179,11 @@ install-remote: ## Show remote installation command
 	@echo "  • Build Docker environment"
 	@echo "  • No repository cloning required - everything is automated"
 
-remote-install: install-remote ## Alias for install-remote
+remote-install: install-remote
 
-test-remote-scripts: ## Test remote installation scripts locally
+test-remote-scripts:
 	@echo "$(BLUE)Testing remote installation scripts...$(NC)"
 	@bash -n scripts/remote-install.sh && echo "$(GREEN)✓ remote-install.sh syntax OK$(NC)"
 	@bash -n scripts/remote-uninstall.sh && echo "$(GREEN)✓ remote-uninstall.sh syntax OK$(NC)"  
 	@bash -n scripts/remote-update.sh && echo "$(GREEN)✓ remote-update.sh syntax OK$(NC)"
 	@echo "$(GREEN)All remote scripts passed syntax check!$(NC)"
-
-configure: ## Reconfigure directories and timezone
-	@echo "$(BLUE)Reconfiguring LazyVim Docker environment...$(NC)"
-	@./scripts/configure.sh

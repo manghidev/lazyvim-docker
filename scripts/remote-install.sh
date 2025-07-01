@@ -204,7 +204,7 @@ can_interact() {
     fi
 }
 
-# Safe interactive read
+# Safe interactive read with consistent format
 safe_read() {
     local prompt="$1"
     local default="$2"
@@ -241,6 +241,7 @@ configure_timezone() {
     # Default timezone if detection fails
     local default_tz="${system_tz:-America/Mexico_City}"
     
+    echo "🌍 Timezone Configuration:"
     echo "Current system timezone detected: ${system_tz:-"Could not detect"}"
     echo "Available timezone examples:"
     echo "  - America/New_York"
@@ -327,12 +328,10 @@ configure_directories() {
         
         return
     fi
-    
-    # Interactive mode
-    # Configure Documents directory
+    echo ""
     echo "📁 Documents Directory:"
     if [[ -d "$default_docs" ]]; then
-        local reply=$(safe_read "Mount Documents directory ($default_docs)? (Y/n): " "Y")
+        local reply=$(safe_read "Mount Documents directory ($default_docs)? [Y/n]: " "Y")
         if [[ ! $reply =~ ^[Nn]$ ]]; then
             print_info "Documents directory will be mounted at /home/developer/Documents"
         else
@@ -346,10 +345,9 @@ configure_directories() {
         fi
     fi
     
-    # Configure Projects directory
     echo ""
     echo "💻 Projects Directory:"
-    local reply=$(safe_read "Do you want to mount a Projects directory? (Y/n): " "Y")
+    local reply=$(safe_read "Do you want to mount a Projects directory? [Y/n]: " "Y")
     if [[ ! $reply =~ ^[Nn]$ ]]; then
         local projects_dir=$(safe_read "Enter path to your projects directory [$default_projects]: " "$default_projects")
         
@@ -368,10 +366,9 @@ configure_directories() {
         fi
     fi
     
-    # Configure additional directories
     echo ""
     echo "📂 Additional Directories:"
-    local reply=$(safe_read "Do you want to mount any additional directories? (y/N): " "N")
+    local reply=$(safe_read "Do you want to mount any additional directories? [y/N]: " "N")
     if [[ $reply =~ ^[Yy]$ ]]; then
         local counter=1
         while true; do

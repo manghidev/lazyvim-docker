@@ -77,11 +77,11 @@ EOF
     echo ""
     print_warning "🧹 To complete cleanup and remove any traces:"
     echo ""
-    echo "  ${GREEN}Option 1 (Easiest):${NC}"
-    echo "    ${GREEN}$helper_script${NC}"
+    printf "  ${GREEN}Option 1 (Easiest):${NC}\n"
+    printf "    ${GREEN}%s${NC}\n" "$helper_script"
     echo ""
-    echo "  ${GREEN}Option 2 (Manual):${NC}"
-    echo "    ${GREEN}exec $current_shell${NC}"
+    printf "  ${GREEN}Option 2 (Manual):${NC}\n"
+    printf "    ${GREEN}exec %s${NC}\n" "$current_shell"
     echo ""
     
     # Try to detect if we can restart directly
@@ -203,7 +203,11 @@ remove_global_command() {
 remove_path_modifications() {
     echo ""
     printf "Do you want to remove PATH modifications from shell config? [y/N]: "
-    read -r response </dev/tty
+    if [[ -t 0 ]] && [[ -t 1 ]] && [[ $- == *i* ]]; then
+        read -r response </dev/tty
+    else
+        read -r response
+    fi
     
     case "$response" in
         [yY][eE][sS]|[yY])
@@ -243,7 +247,11 @@ confirm_uninstall() {
     echo "  • All data and configurations"
     echo ""
     printf "Are you sure you want to continue? [y/N]: "
-    read -r response </dev/tty
+    if [[ -t 0 ]] && [[ -t 1 ]] && [[ $- == *i* ]]; then
+        read -r response </dev/tty
+    else
+        read -r response
+    fi
     
     case "$response" in
         [yY][eE][sS]|[yY])
@@ -282,7 +290,7 @@ main() {
     print_info "Thank you for using LazyVim Docker! 🚀"
     echo ""
     print_info "To reinstall later, run:"
-    echo "  ${GREEN}curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/start.sh | bash${NC}"
+    printf "  ${GREEN}curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/start.sh | bash${NC}\n"
     echo ""
     
     # Restart terminal to clean up environment

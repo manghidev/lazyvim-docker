@@ -83,14 +83,14 @@ EOF
     echo ""
     print_warning "🔄 To activate 'lazy' commands, choose the EASIEST option:"
     echo ""
-    echo "  ${GREEN}Option 1 (Easiest):${NC}"
-    echo "    ${GREEN}$helper_script${NC}"
+    printf "  ${GREEN}Option 1 (Easiest):${NC}\n"
+    printf "    ${GREEN}%s${NC}\n" "$helper_script"
     echo ""
-    echo "  ${GREEN}Option 2 (Manual):${NC}"
-    echo "    ${GREEN}exec $current_shell${NC}"
+    printf "  ${GREEN}Option 2 (Manual):${NC}\n"
+    printf "    ${GREEN}exec %s${NC}\n" "$current_shell"
     echo ""
-    echo "  ${GREEN}Option 3 (Alternative):${NC}"
-    echo "    ${GREEN}source ~/.${current_shell}rc${NC}"
+    printf "  ${GREEN}Option 3 (Alternative):${NC}\n"
+    printf "    ${GREEN}source ~/.%src${NC}\n" "$current_shell"
     echo ""
     
     # Try to detect if we can restart directly
@@ -108,7 +108,7 @@ EOF
         fi
     else
         print_info "💡 Copy and paste the first command to restart your terminal"
-        print_info "Then run: ${GREEN}lazy enter${NC}"
+        printf "Then run: ${GREEN}lazy enter${NC}\n"
     fi
 }
 
@@ -321,8 +321,41 @@ build_environment() {
     cd "$INSTALL_DIR"
     
     print_info "This may take a few minutes..."
-    if make build; then
-        print_success "Docker environment built successfully"
+    
+    # Clean up existing environment
+    print_info "Cleaning up existing environment..."
+    docker compose down --rmi all --volumes 2>/dev/null || true
+    
+    # Pull latest base images
+    print_info "Pulling latest base images..."
+    docker compose pull 2>/dev/null || print_warning "Could not pull some images, continuing..."
+    
+    # Build the container
+    print_info "Building container..."
+    if docker compose build --no-cache 2>/dev/null; then
+        print_success "Container built successfully"
+        
+        # Start the container
+        print_info "Starting the container..."
+        if docker compose up --force-recreate -d 2>/dev/null; then
+            print_success "Container started successfully"
+            
+            # Wait for container to be ready
+            print_info "Waiting for container to be ready..."
+            sleep 3
+            
+            # Check if container is running
+            if docker compose ps 2>/dev/null | grep -q "Up"; then
+                print_success "Container is running!"
+                print_info "Opening shell in the container..."
+                # Don't try to open shell automatically - let user do it manually
+                print_info "You can enter the container with: lazy enter"
+            else
+                print_warning "Container may not have started properly. Check with 'lazy status'"
+            fi
+        else
+            print_warning "Failed to start container. You can try 'lazy start' later."
+        fi
     else
         print_warning "Docker build failed, but installation completed. You can run 'lazy build' later."
     fi
@@ -363,17 +396,17 @@ main() {
     echo "  • Projects: Auto-mounted if exists"
     echo ""
     print_info "Usage:"
-    echo "  ${GREEN}lazy enter${NC}     # Enter LazyVim development environment"
-    echo "  ${GREEN}lazy start${NC}     # Start the container"
-    echo "  ${GREEN}lazy stop${NC}      # Stop the container"
-    echo "  ${GREEN}lazy status${NC}    # Check container status"
-    echo "  ${GREEN}lazy configure${NC} # Reconfigure directories and timezone"
-    echo "  ${GREEN}lazy update${NC}    # Update to latest version"
-    echo "  ${GREEN}lazy uninstall${NC} # Uninstall everything"
-    echo "  ${GREEN}lazy help${NC}      # Show all available commands"
+    printf "  ${GREEN}lazy enter${NC}     # Enter LazyVim development environment\n"
+    printf "  ${GREEN}lazy start${NC}     # Start the container\n"
+    printf "  ${GREEN}lazy stop${NC}      # Stop the container\n"
+    printf "  ${GREEN}lazy status${NC}    # Check container status\n"
+    printf "  ${GREEN}lazy configure${NC} # Reconfigure directories and timezone\n"
+    printf "  ${GREEN}lazy update${NC}    # Update to latest version\n"
+    printf "  ${GREEN}lazy uninstall${NC} # Uninstall everything\n"
+    printf "  ${GREEN}lazy help${NC}      # Show all available commands\n"
     echo ""
     print_info "To customize configuration later:"
-    echo "  Run: ${GREEN}lazy configure${NC}"
+    printf "  Run: ${GREEN}lazy configure${NC}\n"
     echo ""
     print_info "Happy coding! 🚀"
     echo ""

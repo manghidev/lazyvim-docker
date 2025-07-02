@@ -217,7 +217,7 @@ main() {
     print_info "Backup available at: $BACKUP_DIR"
     echo ""
     print_info "To start using the updated version:"
-    echo "  ${GREEN}lazyvim enter${NC}"
+    printf "  ${GREEN}lazyvim enter${NC}\n"
     echo ""
 }
 

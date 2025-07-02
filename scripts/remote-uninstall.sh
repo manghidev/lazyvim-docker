@@ -46,6 +46,51 @@ print_step() {
     echo -e "${PURPLE}[STEP]${NC} $1"
 }
 
+# Detect current shell and restart terminal
+restart_terminal() {
+    print_step "Restarting terminal to apply changes..."
+    
+    # Detect current shell - prioritize SHELL environment variable for user's preference
+    local current_shell=""
+    if [ -n "$SHELL" ]; then
+        case "$SHELL" in
+            */zsh)
+                current_shell="zsh"
+                ;;
+            */bash)
+                current_shell="bash"
+                ;;
+            *)
+                # Check if we're currently in a specific shell
+                if [ -n "$ZSH_VERSION" ]; then
+                    current_shell="zsh"
+                elif [ -n "$BASH_VERSION" ]; then
+                    current_shell="bash"
+                else
+                    # Default to bash if unable to detect
+                    current_shell="bash"
+                fi
+                ;;
+        esac
+    else
+        # Fallback if SHELL is not set
+        if [ -n "$ZSH_VERSION" ]; then
+            current_shell="zsh"
+        elif [ -n "$BASH_VERSION" ]; then
+            current_shell="bash"
+        else
+            current_shell="bash"
+        fi
+    fi
+    
+    print_info "Detected shell: $current_shell"
+    print_info "Restarting terminal to clean up environment..."
+    echo ""
+    
+    # Execute the shell to restart
+    exec "$current_shell"
+}
+
 # Stop and remove Docker containers
 cleanup_docker() {
     print_step "Cleaning up Docker containers and images..."
@@ -227,6 +272,9 @@ main() {
     print_info "To reinstall later, run:"
     echo "  ${GREEN}curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/start.sh | bash${NC}"
     echo ""
+    
+    # Restart terminal to clean up environment
+    restart_terminal
 }
 
 # Run main function

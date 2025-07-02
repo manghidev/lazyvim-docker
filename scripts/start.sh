@@ -52,6 +52,51 @@ print_step() {
     echo -e "${PURPLE}[STEP]${NC} $1"
 }
 
+# Detect current shell and restart terminal
+restart_terminal() {
+    print_step "Restarting terminal to apply changes..."
+    
+    # Detect current shell - prioritize SHELL environment variable for user's preference
+    local current_shell=""
+    if [ -n "$SHELL" ]; then
+        case "$SHELL" in
+            */zsh)
+                current_shell="zsh"
+                ;;
+            */bash)
+                current_shell="bash"
+                ;;
+            *)
+                # Check if we're currently in a specific shell
+                if [ -n "$ZSH_VERSION" ]; then
+                    current_shell="zsh"
+                elif [ -n "$BASH_VERSION" ]; then
+                    current_shell="bash"
+                else
+                    # Default to bash if unable to detect
+                    current_shell="bash"
+                fi
+                ;;
+        esac
+    else
+        # Fallback if SHELL is not set
+        if [ -n "$ZSH_VERSION" ]; then
+            current_shell="zsh"
+        elif [ -n "$BASH_VERSION" ]; then
+            current_shell="bash"
+        else
+            current_shell="bash"
+        fi
+    fi
+    
+    print_info "Detected shell: $current_shell"
+    print_info "Restarting terminal to make 'lazy' commands available..."
+    echo ""
+    
+    # Execute the shell to restart
+    exec "$current_shell"
+}
+
 # Check if command exists
 command_exists() {
     command -v "$1" >/dev/null 2>&1
@@ -312,14 +357,14 @@ main() {
     echo "  ${GREEN}lazy uninstall${NC} # Uninstall everything"
     echo "  ${GREEN}lazy help${NC}      # Show all available commands"
     echo ""
-    print_info "To get started:"
-    echo "  1. Restart your terminal or run: ${YELLOW}source ~/.zshrc${NC} (or ~/.bashrc)"
-    echo "  2. Run: ${GREEN}lazy enter${NC}"
-    echo ""
     print_info "To customize configuration later:"
     echo "  Run: ${GREEN}lazy configure${NC}"
     echo ""
     print_info "Happy coding! 🚀"
+    echo ""
+    
+    # Restart terminal to make commands available immediately
+    restart_terminal
 }
 
 # Run main function

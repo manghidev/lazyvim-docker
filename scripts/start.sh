@@ -52,49 +52,64 @@ print_step() {
     echo -e "${PURPLE}[STEP]${NC} $1"
 }
 
-# Detect current shell and restart terminal
+# Smart terminal restart with helper script
 restart_terminal() {
-    print_step "Restarting terminal to apply changes..."
+    print_step "Setting up terminal restart..."
     
-    # Detect current shell - prioritize SHELL environment variable for user's preference
+    # Detect current shell
     local current_shell=""
     if [ -n "$SHELL" ]; then
         case "$SHELL" in
-            */zsh)
-                current_shell="zsh"
-                ;;
-            */bash)
-                current_shell="bash"
-                ;;
-            *)
-                # Check if we're currently in a specific shell
-                if [ -n "$ZSH_VERSION" ]; then
-                    current_shell="zsh"
-                elif [ -n "$BASH_VERSION" ]; then
-                    current_shell="bash"
-                else
-                    # Default to bash if unable to detect
-                    current_shell="bash"
-                fi
-                ;;
+            */zsh) current_shell="zsh" ;;
+            */bash) current_shell="bash" ;;
+            *) current_shell="bash" ;;
         esac
     else
-        # Fallback if SHELL is not set
-        if [ -n "$ZSH_VERSION" ]; then
-            current_shell="zsh"
-        elif [ -n "$BASH_VERSION" ]; then
-            current_shell="bash"
-        else
-            current_shell="bash"
-        fi
+        current_shell="bash"
     fi
     
     print_info "Detected shell: $current_shell"
-    print_info "Restarting terminal to make 'lazy' commands available..."
+    
+    # Create a helper script for easy restart
+    local helper_script="/tmp/lazyvim_restart_terminal.sh"
+    cat > "$helper_script" << 'EOF'
+#!/bin/bash
+echo "🔄 Restarting terminal to activate LazyVim Docker commands..."
+echo ""
+EOF
+    echo "exec $current_shell" >> "$helper_script"
+    chmod +x "$helper_script"
+    
+    echo ""
+    print_warning "🔄 To activate 'lazy' commands, choose the EASIEST option:"
+    echo ""
+    echo "  ${GREEN}Option 1 (Easiest):${NC}"
+    echo "    ${GREEN}$helper_script${NC}"
+    echo ""
+    echo "  ${GREEN}Option 2 (Manual):${NC}"
+    echo "    ${GREEN}exec $current_shell${NC}"
+    echo ""
+    echo "  ${GREEN}Option 3 (Alternative):${NC}"
+    echo "    ${GREEN}source ~/.${current_shell}rc${NC}"
     echo ""
     
-    # Execute the shell to restart
-    exec "$current_shell"
+    # Try to detect if we can restart directly
+    if [[ -t 0 ]] && [[ -t 1 ]] && [[ $- == *i* ]]; then
+        print_info "✨ Auto-restart available!"
+        local choice
+        printf "Press ENTER to restart now, or 'n' to do it manually: "
+        read -r choice
+        
+        if [[ "$choice" != "n" ]] && [[ "$choice" != "N" ]]; then
+            print_info "Restarting terminal..."
+            exec "$current_shell"
+        else
+            print_info "Manual restart chosen - use the commands above"
+        fi
+    else
+        print_info "💡 Copy and paste the first command to restart your terminal"
+        print_info "Then run: ${GREEN}lazy enter${NC}"
+    fi
 }
 
 # Check if command exists

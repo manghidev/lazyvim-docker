@@ -17,30 +17,30 @@ CONTAINER_NAME="lazyvim"
 
 # Functions
 log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
+    printf "${BLUE}[INFO]${NC} %s\n" "$1"
 }
 
 log_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
+    printf "${GREEN}[SUCCESS]${NC} %s\n" "$1"
 }
 
 log_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
+    printf "${YELLOW}[WARNING]${NC} %s\n" "$1"
 }
 
 log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+    printf "${RED}[ERROR]${NC} %s\n" "$1"
 }
 
 print_header() {
-    echo -e "${BLUE}=== LazyVim Docker Health Check ===${NC}"
-    echo ""
+    printf "${BLUE}=== LazyVim Docker Health Check ===${NC}\n"
+    printf "\n"
 }
 
 print_separator() {
-    echo ""
-    echo "-----------------------------------"
-    echo ""
+    printf "\n"
+    printf -- "-----------------------------------\n"
+    printf "\n"
 }
 
 # Main health check function
@@ -52,7 +52,7 @@ health_check() {
     if docker info >/dev/null 2>&1; then
         log_success "Docker is running"
         DOCKER_VERSION=$(docker --version)
-        echo "  Version: $DOCKER_VERSION"
+        printf "  Version: %s\n" "$DOCKER_VERSION"
     else
         log_error "Docker is not running or not installed"
         return 1
@@ -65,7 +65,7 @@ health_check() {
     if docker compose version >/dev/null 2>&1; then
         log_success "Docker Compose is available"
         COMPOSE_VERSION=$(docker compose version --short)
-        echo "  Version: $COMPOSE_VERSION"
+        printf "  Version: %s\n" "$COMPOSE_VERSION"
     else
         log_error "Docker Compose is not available"
         return 1
@@ -79,7 +79,7 @@ health_check() {
     
     if [ "$CONTAINER_STATE" = "missing" ]; then
         log_warning "Container does not exist"
-        echo "  Use 'make build' to create it"
+        printf "  Use 'make build' to create it\n"
     elif [ "$CONTAINER_STATE" = "running" ]; then
         log_success "Container is running"
         
@@ -87,8 +87,8 @@ health_check() {
         log_info "Checking container health..."
         CONTAINER_HEALTH=$(docker inspect "$CONTAINER_NAME" --format='{{.State.Health.Status}}' 2>/dev/null || echo "No health check")
         
-        echo "  Status: $CONTAINER_STATE"
-        echo "  Health: $CONTAINER_HEALTH"
+        printf "  Status: %s\n" "$CONTAINER_STATE"
+        printf "  Health: %s\n" "$CONTAINER_HEALTH"
         
         # Check if we can execute commands in the container
         if docker exec "$CONTAINER_NAME" echo "Container accessible" >/dev/null 2>&1; then
@@ -98,7 +98,7 @@ health_check() {
         fi
     else
         log_warning "Container exists but is stopped ($CONTAINER_STATE)"
-        echo "  Use 'make start' to start it"
+        printf "  Use 'make start' to start it\n"
     fi
     
     print_separator
@@ -124,14 +124,14 @@ health_check() {
         DOTFILES=(".dotfiles/.zshrc" ".dotfiles/.p10k.zsh" ".dotfiles/.config/nvim" ".dotfiles/.config/lazygit")
         for file in "${DOTFILES[@]}"; do
             if [[ -e "$file" ]]; then
-                echo "  ✓ $file"
+                printf "  ✓ %s\n" "$file"
             else
                 log_warning "Missing: $file"
             fi
         done
     else
         log_warning "Dotfiles directory does not exist"
-        echo "  It will be created automatically when you build the environment"
+        printf "  It will be created automatically when you build the environment\n"
     fi
     
     print_separator
@@ -154,13 +154,13 @@ health_check() {
     
     if [ "$FINAL_CONTAINER_STATE" = "running" ]; then
         log_success "Environment is ready to use!"
-        echo "  Use 'make enter' to access the container"
+        printf "  Use 'make enter' to access the container\n"
     elif [ "$FINAL_CONTAINER_STATE" = "missing" ]; then
         log_info "Environment is not built"
-        echo "  Use 'make build' to create the container"
+        printf "  Use 'make build' to create the container\n"
     else
         log_info "Environment is not running"
-        echo "  Use 'make start' to start the existing container"
+        printf "  Use 'make start' to start the existing container\n"
     fi
 }
 

@@ -20,30 +20,30 @@ BIN_DIR="$HOME/.local/bin"
 
 # Print functions
 print_header() {
-    echo -e "${CYAN}╔══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║             LazyVim Docker - Uninstaller                    ║${NC}"
-    echo -e "${CYAN}╚══════════════════════════════════════════════════════════════╝${NC}"
-    echo ""
+    printf "${CYAN}╔══════════════════════════════════════════════════════════════╗${NC}\n"
+    printf "${CYAN}║             LazyVim Docker - Uninstaller                    ║${NC}\n"
+    printf "${CYAN}╚══════════════════════════════════════════════════════════════╝${NC}\n"
+    printf "\n"
 }
 
 print_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
+    printf "${BLUE}[INFO]${NC} %s\n" "$1"
 }
 
 print_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
+    printf "${GREEN}[SUCCESS]${NC} %s\n" "$1"
 }
 
 print_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
+    printf "${YELLOW}[WARNING]${NC} %s\n" "$1"
 }
 
 print_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+    printf "${RED}[ERROR]${NC} %s\n" "$1"
 }
 
 print_step() {
-    echo -e "${PURPLE}[STEP]${NC} $1"
+    printf "${PURPLE}[STEP]${NC} %s\n" "$1"
 }
 
 # Smart terminal restart for clean environment

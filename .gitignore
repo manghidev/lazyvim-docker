@@ -8,6 +8,9 @@
 .dotfiles/.zcompdump-*
 .dotfiles/.zsh_history
 
+# LazyVim Docker configuration
+.lazyvim-docker-config
+
 # Backup files
 backups/
 *.backup

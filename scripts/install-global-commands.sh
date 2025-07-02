@@ -14,19 +14,19 @@ NC='\033[0m'
 
 # Functions
 log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
+    printf "${BLUE}[INFO]${NC} %s\n" "$1"
 }
 
 log_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
+    printf "${GREEN}[SUCCESS]${NC} %s\n" "$1"
 }
 
 log_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
+    printf "${YELLOW}[WARNING]${NC} %s\n" "$1"
 }
 
 log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+    printf "${RED}[ERROR]${NC} %s\n" "$1"
 }
 
 # Get the absolute path of the lazyvim-docker directory
@@ -264,16 +264,16 @@ install_global_commands() {
     local current_shell=""
     if [[ -n "$ZSH_VERSION" ]]; then
         current_shell="zsh"
-        echo -e "${GREEN}For your current Zsh session, run: source ~/.zshrc${NC}"
+        printf "${GREEN}For your current Zsh session, run: source ~/.zshrc${NC}\n"
     elif [[ -n "$BASH_VERSION" ]]; then
         current_shell="bash"
-        echo -e "${GREEN}For your current Bash session, run: source ~/.bashrc${NC}"
+        printf "${GREEN}For your current Bash session, run: source ~/.bashrc${NC}\n"
     elif [[ "$SHELL" == *"zsh"* ]]; then
         current_shell="zsh"
-        echo -e "${GREEN}For your current Zsh session, run: source ~/.zshrc${NC}"
+        printf "${GREEN}For your current Zsh session, run: source ~/.zshrc${NC}\n"
     else
         current_shell="bash"
-        echo -e "${GREEN}For your current Bash session, run: source ~/.bashrc${NC}"
+        printf "${GREEN}For your current Bash session, run: source ~/.bashrc${NC}\n"
     fi
     
     echo ""

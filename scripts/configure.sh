@@ -25,31 +25,31 @@ CONFIG_FILE=".lazyvim-docker-config"
 
 # Functions
 log_info() {
-    echo -e "${BLUE}ℹ️  ${NC} $1"
+    printf "${BLUE}ℹ️  ${NC} %s\n" "$1"
 }
 
 log_success() {
-    echo -e "${GREEN}✅ ${NC} $1"
+    printf "${GREEN}✅ ${NC} %s\n" "$1"
 }
 
 log_warning() {
-    echo -e "${YELLOW}⚠️  ${NC} $1"
+    printf "${YELLOW}⚠️  ${NC} %s\n" "$1"
 }
 
 log_error() {
-    echo -e "${RED}❌ ${NC} $1"
+    printf "${RED}❌ ${NC} %s\n" "$1"
 }
 
 log_step() {
-    echo -e "${PURPLE}🔧 ${NC} $1"
+    printf "${PURPLE}🔧 ${NC} %s\n" "$1"
 }
 
 print_header() {
-    echo -e "${CYAN}╔══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║           LazyVim Docker - Smart Configuration Tool         ║${NC}"
-    echo -e "${CYAN}║       Improved Directory & Timezone Manager v2.0           ║${NC}"
-    echo -e "${CYAN}╚══════════════════════════════════════════════════════════════╝${NC}"
-    echo ""
+    printf "${CYAN}╔══════════════════════════════════════════════════════════════╗${NC}\n"
+    printf "${CYAN}║           LazyVim Docker - Smart Configuration Tool         ║${NC}\n"
+    printf "${CYAN}║       Improved Directory & Timezone Manager v2.0           ║${NC}\n"
+    printf "${CYAN}╚══════════════════════════════════════════════════════════════╝${NC}\n"
+    printf "\n"
 }
 
 # Load user preferences
@@ -85,13 +85,29 @@ is_mount_exists() {
         normalized_path="${host_path/\$HOME/$HOME}"
     fi
     
-    # Check if mount exists (non-commented line)
-    if grep -v "^[[:space:]]*#" docker-compose.yml | grep -q "- $host_path:" || \
-       grep -v "^[[:space:]]*#" docker-compose.yml | grep -q "- $normalized_path:"; then
-        return 0  # Mount exists
-    else
-        return 1  # Mount doesn't exist
-    fi
+    # Check if mount exists in volumes section (non-commented line)
+    local in_volumes_section=false
+    while IFS= read -r line; do
+        # Check if we're entering volumes section
+        if [[ "$line" =~ ^[[:space:]]*volumes:[[:space:]]*$ ]]; then
+            in_volumes_section=true
+            continue
+        fi
+        
+        # Check if we're leaving volumes section (next main section)
+        if [[ "$in_volumes_section" == "true" ]] && [[ "$line" =~ ^[[:space:]]*[a-zA-Z_-]+:[[:space:]]*$ ]] && [[ ! "$line" =~ volumes: ]]; then
+            in_volumes_section=false
+            continue
+        fi
+        
+        # Check for mount within volumes section (non-commented)
+        if [[ "$in_volumes_section" == "true" ]] && [[ ! "$line" =~ ^[[:space:]]*# ]] && \
+           ([[ "$line" =~ "$host_path:" ]] || [[ "$line" =~ "$normalized_path:" ]]); then
+            return 0  # Mount exists
+        fi
+    done < docker-compose.yml
+    
+    return 1  # Mount doesn't exist
 }
 
 # Get all current mounts in a structured way
@@ -101,17 +117,31 @@ get_current_mounts() {
     local mounts_found=false
     local mounts_data=()
     
-    echo -e "${CYAN}📁 Current Directory Mounts:${NC}"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    printf "${CYAN}📁 Current Directory Mounts:${NC}\n"
+    printf "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
     
-    # Parse docker-compose.yml for volume mounts
+    # Parse docker-compose.yml for volume mounts - look in volumes section
+    local in_volumes_section=false
     while IFS= read -r line; do
-        if [[ "$line" =~ ^[[:space:]]*-[[:space:]]+([^:]+):([^:]+)$ ]]; then
+        # Check if we're entering volumes section
+        if [[ "$line" =~ ^[[:space:]]*volumes:[[:space:]]*$ ]]; then
+            in_volumes_section=true
+            continue
+        fi
+        
+        # Check if we're leaving volumes section (next main section)
+        if [[ "$in_volumes_section" == "true" ]] && [[ "$line" =~ ^[[:space:]]*[a-zA-Z_-]+:[[:space:]]*$ ]] && [[ ! "$line" =~ volumes: ]]; then
+            in_volumes_section=false
+            continue
+        fi
+        
+        # Process volume mounts only within volumes section
+        if [[ "$in_volumes_section" == "true" ]] && [[ "$line" =~ ^[[:space:]]*-[[:space:]]+([^:]+):([^:]+)$ ]]; then
             local host_path="${BASH_REMATCH[1]}"
             local container_path="${BASH_REMATCH[2]}"
             
-            # Skip system mounts (cache, npm, etc.)
-            if [[ "$container_path" =~ (cache|npm|pip|yarn|\.dotfiles|\.ssh|config/nvim) ]]; then
+            # Skip ONLY system caches and configs, NOT user dotfiles
+            if [[ "$container_path" =~ (/root/\.cache|/home/developer/\.cache|/tmp|cache|\.npm|\.pip|\.yarn) ]]; then
                 continue
             fi
             
@@ -140,23 +170,26 @@ get_current_mounts() {
             else
                 printf "      ${BLUE}Status:${NC} ${RED}❌ Missing${NC}\n"
             fi
-            echo ""
+            printf "\n"
             
             counter=$((counter + 1))
             mounts_found=true
         fi
-    done < <(grep -v "^[[:space:]]*#" docker-compose.yml | grep -E "^\s*-\s+.*:.*$")
+    done < docker-compose.yml
     
     if [[ "$mounts_found" != "true" ]]; then
-        echo "  ${GRAY}No custom directory mounts configured${NC}"
-        echo ""
+        printf "  ${GRAY}No custom directory mounts configured${NC}\n"
+        printf "\n"
     fi
     
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    printf "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
     
     # Export mounts data for removal function
     export CURRENT_MOUNTS_DATA="${mounts_data[*]}"
-    return $((counter - 1))  # Return total count
+    
+    # Return 0 always to avoid script termination
+    echo "$((counter - 1))" > /tmp/mount_count
+    return 0
 }
 
 # Add a directory mount (prevents duplicates)
@@ -176,23 +209,25 @@ add_directory_mount() {
         return 1
     fi
     
-    # Add mount after the Documents line or at the end of volumes section
+    # Add mount after the Documents line or at the appropriate place in volumes section
     if grep -q "Documents:" docker-compose.yml; then
-        # Add after Documents line
+        # Add after Documents line with proper formatting
         if [[ "$OSTYPE" == "darwin"* ]]; then
             sed -i '' "/\$HOME\/Documents:/a\\
-      - $host_path:$container_path" docker-compose.yml
+      - $host_path:$container_path\\
+" docker-compose.yml
         else
             sed -i "/\$HOME\/Documents:/a\\
       - $host_path:$container_path" docker-compose.yml
         fi
     else
-        # Find volumes section and add there
+        # Find the end of mount directories section and add there
         if [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i '' "/volumes:/a\\
-      - $host_path:$container_path" docker-compose.yml
+            sed -i '' "/# - \$HOME\/Documents:/a\\
+      - $host_path:$container_path\\
+" docker-compose.yml
         else
-            sed -i "/volumes:/a\\
+            sed -i "/# - \$HOME\/Documents:/a\\
       - $host_path:$container_path" docker-compose.yml
         fi
     fi
@@ -205,25 +240,54 @@ add_directory_mount() {
 remove_directory_mount() {
     local selection="$1"
     
-    # Get current mounts data
-    get_current_mounts "false" > /dev/null
+    # Get current mounts data directly
+    local mounts_data=()
+    local counter=1
     
-    if [[ -z "$CURRENT_MOUNTS_DATA" ]]; then
+    # Parse docker-compose.yml for volume mounts - look in volumes section
+    local in_volumes_section=false
+    while IFS= read -r line; do
+        # Check if we're entering volumes section
+        if [[ "$line" =~ ^[[:space:]]*volumes:[[:space:]]*$ ]]; then
+            in_volumes_section=true
+            continue
+        fi
+        
+        # Check if we're leaving volumes section (next main section)
+        if [[ "$in_volumes_section" == "true" ]] && [[ "$line" =~ ^[[:space:]]*[a-zA-Z_-]+:[[:space:]]*$ ]] && [[ ! "$line" =~ volumes: ]]; then
+            in_volumes_section=false
+            continue
+        fi
+        
+        # Process volume mounts only within volumes section
+        if [[ "$in_volumes_section" == "true" ]] && [[ "$line" =~ ^[[:space:]]*-[[:space:]]+([^:]+):([^:]+)$ ]]; then
+            local host_path="${BASH_REMATCH[1]}"
+            local container_path="${BASH_REMATCH[2]}"
+            
+            # Skip ONLY system caches and configs, NOT user dotfiles
+            if [[ "$container_path" =~ (/root/\.cache|/home/developer/\.cache|/tmp|cache|\.npm|\.pip|\.yarn) ]]; then
+                continue
+            fi
+            
+            # Store mount data for potential removal
+            mounts_data+=("$host_path:$container_path")
+            counter=$((counter + 1))
+        fi
+    done < docker-compose.yml
+    
+    if [[ ${#mounts_data[@]} -eq 0 ]]; then
         log_warning "No mounts available to remove"
         return 1
     fi
     
-    # Convert space-separated data to array
-    IFS=' ' read -ra mounts_array <<< "$CURRENT_MOUNTS_DATA"
-    
     # Validate selection
-    if [[ ! "$selection" =~ ^[0-9]+$ ]] || [[ "$selection" -lt 1 ]] || [[ "$selection" -gt "${#mounts_array[@]}" ]]; then
+    if [[ ! "$selection" =~ ^[0-9]+$ ]] || [[ "$selection" -lt 1 ]] || [[ "$selection" -gt "${#mounts_data[@]}" ]]; then
         log_error "Invalid selection: $selection"
         return 1
     fi
     
     # Get the mount to remove (1-indexed to 0-indexed)
-    local mount_to_remove="${mounts_array[$((selection - 1))]}"
+    local mount_to_remove="${mounts_data[$((selection - 1))]}"
     local host_path="${mount_to_remove%:*}"
     local container_path="${mount_to_remove#*:}"
     
@@ -256,10 +320,10 @@ configure_timezone() {
     local current_tz=$(grep "TIMEZONE:" docker-compose.yml | awk '{print $2}' 2>/dev/null || echo "")
     local default_tz="${system_tz:-America/Mexico_City}"
     
-    echo "🌍 Timezone Configuration:"
-    echo "  Current in container: ${current_tz:-"Not set"}"
-    echo "  System timezone: ${system_tz:-"Could not detect"}"
-    echo ""
+    printf "🌍 Timezone Configuration:\n"
+    printf "  Current in container: %s\n" "${current_tz:-"Not set"}"
+    printf "  System timezone: %s\n" "${system_tz:-"Could not detect"}"
+    printf "\n"
     
     # If we have a previous timezone decision and it matches current, skip
     if [[ -n "$LAST_TIMEZONE" ]] && [[ "$LAST_TIMEZONE" == "$current_tz" ]]; then
@@ -267,14 +331,14 @@ configure_timezone() {
         return 0
     fi
     
-    echo "Available timezone examples:"
-    echo "  - America/New_York"
-    echo "  - America/Los_Angeles"  
-    echo "  - America/Mexico_City"
-    echo "  - Europe/London"
-    echo "  - Europe/Madrid"
-    echo "  - Asia/Tokyo"
-    echo ""
+    printf "Available timezone examples:\n"
+    printf "  - America/New_York\n"
+    printf "  - America/Los_Angeles\n"
+    printf "  - America/Mexico_City\n"
+    printf "  - Europe/London\n"
+    printf "  - Europe/Madrid\n"
+    printf "  - Asia/Tokyo\n"
+    printf "\n"
     
     read -p "Enter timezone [$default_tz]: " timezone
     timezone=${timezone:-$default_tz}
@@ -294,7 +358,7 @@ configure_timezone() {
 configure_documents_directory() {
     local default_docs="$HOME/Documents"
     
-    echo "📄 Documents Directory Configuration:"
+    printf "📄 Documents Directory Configuration:\n"
     
     # Check if Documents directory exists
     if [[ ! -d "$default_docs" ]]; then
@@ -303,7 +367,7 @@ configure_documents_directory() {
     fi
     
     # Check current state in docker-compose.yml
-    local is_enabled=$(grep -v "^[[:space:]]*#" docker-compose.yml | grep -q "\$HOME/Documents:" && echo "yes" || echo "no")
+    local is_enabled=$(grep -v "^[[:space:]]*#" docker-compose.yml | grep -q "\$HOME/Documents:" && printf "yes" || printf "no")
     
     # If we have a previous decision and current state matches, skip asking
     if [[ -n "$DOCUMENTS_DECISION" ]]; then
@@ -316,9 +380,9 @@ configure_documents_directory() {
         fi
     fi
     
-    echo "  Path: $default_docs"
-    echo "  Status: $([ "$is_enabled" == "yes" ] && echo "✅ Enabled" || echo "❌ Disabled")"
-    echo ""
+    printf "  Path: %s\n" "$default_docs"
+    printf "  Status: %s\n" "$([ "$is_enabled" == "yes" ] && printf "✅ Enabled" || printf "❌ Disabled")"
+    printf "\n"
     
     local reply
     read -p "Mount Documents directory? [Y/n]: " reply
@@ -357,11 +421,11 @@ configure_projects_directory() {
         default_projects="$HOME/Projects"
     fi
     
-    echo ""
-    echo "💻 Projects Directory Configuration:"
+    printf "\n"
+    printf "💻 Projects Directory Configuration:\n"
     
     # Get current Projects mount if exists
-    local current_projects=$(grep -v "^[[:space:]]*#" docker-compose.yml | grep "Projects:/home/developer/Projects" | sed 's/.*- //' | sed 's/:.*//' || echo "")
+    local current_projects=$(grep -v "^[[:space:]]*#" docker-compose.yml | grep "Projects:/home/developer/Projects" | sed 's/.*- //' | sed 's/:.*//' || printf "")
     
     # If we have a previous decision and current state matches, skip asking
     if [[ -n "$PROJECTS_DECISION" ]]; then
@@ -375,13 +439,13 @@ configure_projects_directory() {
     fi
     
     if [[ -n "$current_projects" ]]; then
-        echo "  Current: $current_projects"
-        echo "  Status: ✅ Enabled"
+        printf "  Current: %s\n" "$current_projects"
+        printf "  Status: ✅ Enabled\n"
     else
-        echo "  Default: $default_projects"
-        echo "  Status: ❌ Not configured"
+        printf "  Default: %s\n" "$default_projects"
+        printf "  Status: ❌ Not configured\n"
     fi
-    echo ""
+    printf "\n"
     
     local reply
     read -p "Mount Projects directory? [Y/n]: " reply
@@ -435,20 +499,21 @@ configure_projects_directory() {
 
 # Interactive menu for additional directories
 configure_additional_directories() {
-    echo ""
-    echo "📂 Additional Directory Management:"
-    echo ""
+    printf "\n"
+    printf "📂 Additional Directory Management:\n"
+    printf "\n"
     
     while true; do
-        echo "Choose an option:"
-        echo "  ${GREEN}1.${NC} Add custom directory mount"
-        echo "  ${YELLOW}2.${NC} Remove directory mount"
-        echo "  ${BLUE}3.${NC} List current mounts"
-        echo "  ${RED}4.${NC} Continue with configuration"
-        echo ""
+        printf "Choose an option:\n"
+        printf "  ${GREEN}1.${NC} Add custom directory mount\n"
+        printf "  ${YELLOW}2.${NC} Remove directory mount\n"
+        printf "  ${BLUE}3.${NC} List current mounts\n"
+        printf "  ${PURPLE}4.${NC} Add multiple directories at once\n"
+        printf "  ${RED}5.${NC} Continue with configuration\n"
+        printf "\n"
         
-        read -p "Select option (1-4): " choice
-        echo ""
+        read -p "Select option (1-5): " choice
+        printf "\n"
         
         case "$choice" in
             1)
@@ -473,26 +538,28 @@ configure_additional_directories() {
                 container_path=${container_path:-"/home/developer/$mount_name"}
                 
                 if add_directory_mount "$custom_dir" "$container_path"; then
-                    echo ""
+                    printf "\n"
                     log_success "Mount added successfully!"
                 else
-                    echo ""
+                    printf "\n"
                     log_error "Failed to add mount"
                 fi
                 ;;
             2)
-                echo "Select directory mount to remove:"
-                echo ""
-                local mount_count
-                mount_count=$(get_current_mounts "true")
+                printf "Select directory mount to remove:\n"
+                printf "\n"
+                
+                # Get and show numbered list
+                get_current_mounts "true"
+                local mount_count=$(cat /tmp/mount_count 2>/dev/null || echo "0")
                 
                 if [[ "$mount_count" -eq 0 ]]; then
-                    echo ""
+                    printf "\n"
                     log_warning "No mounts available to remove"
                     continue
                 fi
                 
-                echo ""
+                printf "\n"
                 read -p "Enter number to remove (or 'cancel'): " selection
                 
                 if [[ "$selection" == "cancel" ]] || [[ "$selection" == "c" ]]; then
@@ -501,10 +568,10 @@ configure_additional_directories() {
                 fi
                 
                 if remove_directory_mount "$selection"; then
-                    echo ""
+                    printf "\n"
                     log_success "Mount removed successfully!"
                 else
-                    echo ""
+                    printf "\n"
                     log_error "Failed to remove mount"
                 fi
                 ;;
@@ -512,13 +579,52 @@ configure_additional_directories() {
                 get_current_mounts "false"
                 ;;
             4)
+                printf "Enter multiple directories (one per line, empty line to finish):\n"
+                local dirs_to_add=()
+                while true; do
+                    read -p "Directory path: " dir_path
+                    if [[ -z "$dir_path" ]]; then
+                        break
+                    fi
+                    
+                    # Expand ~ to $HOME
+                    if [[ "$dir_path" =~ ^~ ]]; then
+                        dir_path="${dir_path/#\~/$HOME}"
+                    fi
+                    
+                    if [[ -d "$dir_path" ]]; then
+                        dirs_to_add+=("$dir_path")
+                        printf "  ${GREEN}✓${NC} Added to queue: $dir_path\n"
+                    else
+                        printf "  ${RED}✗${NC} Directory not found: $dir_path\n"
+                    fi
+                done
+                
+                if [[ ${#dirs_to_add[@]} -gt 0 ]]; then
+                    printf "\nAdding ${#dirs_to_add[@]} directories...\n"
+                    for dir in "${dirs_to_add[@]}"; do
+                        local mount_name=$(basename "$dir")
+                        local container_path="/home/developer/$mount_name"
+                        if add_directory_mount "$dir" "$container_path"; then
+                            log_success "Added: $dir → $container_path"
+                        else
+                            log_error "Failed to add: $dir"
+                        fi
+                    done
+                    printf "\n"
+                    log_success "Batch addition completed!"
+                else
+                    log_info "No directories were added"
+                fi
+                ;;
+            5)
                 break
                 ;;
             *)
-                log_warning "Invalid option. Please select 1-4."
+                log_warning "Invalid option. Please select 1-5."
                 ;;
         esac
-        echo ""
+        printf "\n"
     done
 }
 
@@ -530,15 +636,15 @@ main() {
     load_config
     
     log_step "Starting LazyVim Docker configuration..."
-    echo ""
+    printf "\n"
     
     # Configure timezone
     configure_timezone
-    echo ""
+    printf "\n"
     
     # Configure directories
     log_step "Configuring directory mounts..."
-    echo ""
+    printf "\n"
     
     # Configure Documents directory (with memory)
     configure_documents_directory
@@ -552,17 +658,25 @@ main() {
     # Save configuration
     save_config
     
-    echo ""
+    printf "\n"
     log_success "Configuration completed!"
-    echo ""
-    echo "Next steps:"
-    echo "  ${CYAN}1.${NC} Run: ${GREEN}make build${NC} or ${GREEN}lazy build${NC} to rebuild the container"
-    echo "  ${CYAN}2.${NC} Run: ${GREEN}make start${NC} or ${GREEN}lazy start${NC} to start LazyVim"
-    echo ""
-    echo "Your mounted directories will be available inside the container at:"
+    printf "\n"
+    printf "Next steps:\n"
+    printf "  ${CYAN}1.${NC} Run: ${GREEN}make build${NC} or ${GREEN}lazy build${NC} to rebuild the container\n"
+    printf "  ${CYAN}2.${NC} Run: ${GREEN}make start${NC} or ${GREEN}lazy start${NC} to start LazyVim\n"
+    printf "\n"
+    printf "Your mounted directories will be available inside the container at:\n"
     get_current_mounts "false"
-    echo ""
+    printf "\n"
+    
+    # Clean up temp files
+    rm -f /tmp/mount_count
+    
+    # Exit successfully
+    exit 0
 }
 
-# Run main function
-main "$@"
+# Run main function only if script is executed directly (not sourced)
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi

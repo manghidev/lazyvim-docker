@@ -53,7 +53,7 @@ check_installation() {
     if [ ! -d "$INSTALL_DIR" ]; then
         print_error "LazyVim Docker installation not found at: $INSTALL_DIR"
         print_info "Please install first:"
-        echo "  curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-install.sh | bash"
+        echo "  curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/start.sh | bash"
         exit 1
     fi
 }

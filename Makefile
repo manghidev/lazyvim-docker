@@ -172,19 +172,19 @@ install-remote:
 	@echo "$(BLUE)LazyVim Docker - Remote Installation$(NC)"
 	@echo ""
 	@echo "To install LazyVim Docker remotely (recommended):"
-	@echo "$(GREEN)curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-install.sh | bash$(NC)"
+	@echo "$(GREEN)curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/start.sh | bash$(NC)"
 	@echo ""
 	@echo "This will:"
 	@echo "  • Download and install LazyVim Docker to ~/.local/share/lazyvim-docker"
 	@echo "  • Create global 'lazy' command"
-	@echo "  • Build Docker environment"
+	@echo "  • Build Docker environment with smart defaults"
 	@echo "  • No repository cloning required - everything is automated"
 
 remote-install: install-remote
 
 test-remote-scripts:
 	@echo "$(BLUE)Testing remote installation scripts...$(NC)"
-	@bash -n scripts/remote-install.sh && echo "$(GREEN)✓ remote-install.sh syntax OK$(NC)"
+	@bash -n scripts/start.sh && echo "$(GREEN)✓ start.sh syntax OK$(NC)"
 	@bash -n scripts/remote-uninstall.sh && echo "$(GREEN)✓ remote-uninstall.sh syntax OK$(NC)"  
 	@bash -n scripts/remote-update.sh && echo "$(GREEN)✓ remote-update.sh syntax OK$(NC)"
 	@echo "$(GREEN)All remote scripts passed syntax check!$(NC)"

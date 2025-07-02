@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# LazyVim Docker - Simple Remote Installation Script
-# This version uses smart defaults and skips interactive configuration
-# Perfect for automated installations or when interactive input fails
+# LazyVim Docker - One-Command Setup
+# Automatic installation with smart defaults - no questions asked!
+# Usage: curl -fsSL https://raw.githubusercontent.com/USER/lazyvim-docker/main/scripts/start.sh | bash
 
 set -e
 
@@ -26,8 +26,8 @@ BRANCH="${LAZYVIM_BRANCH:-develop}"
 # Print functions
 print_header() {
     echo -e "${CYAN}╔══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║             LazyVim Docker - Simple Installer               ║${NC}"
-    echo -e "${CYAN}║                 Smart Defaults, Zero Input                  ║${NC}"
+    echo -e "${CYAN}║                LazyVim Docker - Quick Start                 ║${NC}"
+    echo -e "${CYAN}║             One Command, Instant Development               ║${NC}"
     echo -e "${CYAN}╚══════════════════════════════════════════════════════════════╝${NC}"
     echo ""
 }

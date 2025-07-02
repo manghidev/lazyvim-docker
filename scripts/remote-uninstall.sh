@@ -225,7 +225,7 @@ main() {
     print_info "Thank you for using LazyVim Docker! 🚀"
     echo ""
     print_info "To reinstall later, run:"
-    echo "  ${GREEN}curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-install.sh | bash${NC}"
+    echo "  ${GREEN}curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/start.sh | bash${NC}"
     echo ""
 }
 

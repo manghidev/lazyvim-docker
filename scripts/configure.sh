@@ -164,11 +164,24 @@ get_current_mounts() {
             printf "${GREEN}Host:${NC} %s\n" "$display_host_path"
             printf "      ${CYAN}→${NC} Container: %s\n" "$container_path"
             
-            # Check if directory exists
-            if [[ -d "$display_host_path" ]]; then
-                printf "      ${BLUE}Status:${NC} ${GREEN}✅ Exists${NC}\n"
+            # Check if directory or file exists
+            if [[ -e "$display_host_path" ]]; then
+                if [[ -d "$display_host_path" ]]; then
+                    printf "      ${BLUE}Status:${NC} ${GREEN}✅ Directory Exists${NC}\n"
+                elif [[ -f "$display_host_path" ]]; then
+                    printf "      ${BLUE}Status:${NC} ${GREEN}✅ File Exists${NC}\n"
+                else
+                    printf "      ${BLUE}Status:${NC} ${GREEN}✅ Exists${NC}\n"
+                fi
             else
-                printf "      ${BLUE}Status:${NC} ${RED}❌ Missing${NC}\n"
+                # For dotfiles that are created by the container, provide helpful info
+                if [[ "$display_host_path" =~ \.dotfiles/\.(zshrc|p10k\.zsh)$ ]]; then
+                    printf "      ${BLUE}Status:${NC} ${YELLOW}⚡ Will be auto-created on first run${NC}\n"
+                elif [[ "$display_host_path" =~ \.dotfiles/\.config/(nvim|lazygit)$ ]]; then
+                    printf "      ${BLUE}Status:${NC} ${YELLOW}⚡ Will be auto-created with configs${NC}\n"
+                else
+                    printf "      ${BLUE}Status:${NC} ${RED}❌ Missing${NC}\n"
+                fi
             fi
             printf "\n"
             

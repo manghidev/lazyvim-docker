@@ -32,6 +32,22 @@ make build    # Build the environment
 make enter    # Enter the container
 ```
 
+### 🗑️ Uninstallation
+Complete removal when you no longer need LazyVim Docker:
+
+```bash
+# Interactive uninstall (asks for confirmation)
+lazy uninstall
+
+# Or run directly 
+curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-uninstall.sh | bash
+
+# Automated uninstall (no prompts - for scripts/CI)
+LAZYVIM_FORCE_UNINSTALL=true curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-uninstall.sh | bash
+```
+
+**Removes everything**: Docker containers, installation files, global commands, and shell configurations in one step.
+
 ---
 
 ## ✨ Features
@@ -120,33 +136,36 @@ curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scrip
 - ✅ Optionally rebuilds Docker containers
 
 ### 🗑️ Uninstallation Script
-**`remote-uninstall.sh`** - Complete cleanup
+**`remote-uninstall.sh`** - Complete and safe cleanup
 
 ```bash
-# Interactive uninstall with prompts
+# Interactive uninstall with confirmation prompt
 lazy uninstall
 
 # Or run directly with prompts
 curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-uninstall.sh | bash
 
-# Force uninstall without prompts (CI/automation)
-curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-uninstall.sh | LAZYVIM_FORCE_UNINSTALL=true bash
-
-# Force uninstall with PATH cleanup
-curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-uninstall.sh | LAZYVIM_FORCE_UNINSTALL=true LAZYVIM_REMOVE_PATH=true bash
+# Force uninstall without prompts (for automation/CI)
+LAZYVIM_FORCE_UNINSTALL=true curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-uninstall.sh | bash
 ```
 
-**What it does:**
-- ✅ Stops and removes Docker containers/images
-- ✅ Removes installation directory (`~/.local/share/lazyvim-docker`)
+**What it does when you confirm:**
+- ✅ Stops and removes all Docker containers and images
+- ✅ Removes installation directory (`~/.local/share/lazyvim-docker`) 
 - ✅ Removes global `lazy` command
-- ✅ Optionally cleans PATH modifications from shell configs
-- ✅ Creates backups before making changes
-- ✅ Interactive prompts for safety (or force mode for automation)
+- ✅ Removes shell configuration entries (`.zshrc`, `.bashrc`, etc.)
+- ✅ Removes PATH modifications automatically
+- ✅ Creates timestamped backups before making changes
+- ✅ **Everything is removed in one confirmation** - no additional prompts
+
+**Safety Features:**
+- 🛡️ **Interactive confirmation** - Shows exactly what will be removed
+- 🛡️ **Non-interactive safety** - Cancels by default when piped unless forced
+- 🛡️ **Automatic backups** - Creates backups of modified configuration files  
+- 🛡️ **Clear messaging** - Shows progress and results of each step
 
 **Environment Variables:**
-- `LAZYVIM_FORCE_UNINSTALL=true` - Skip confirmation prompts
-- `LAZYVIM_REMOVE_PATH=true` - Automatically remove PATH modifications
+- `LAZYVIM_FORCE_UNINSTALL=true` - Force uninstall without confirmation (for automation)
 
 ---
 
@@ -196,26 +215,28 @@ curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scrip
 - Backup created before update in `~/.local/share/lazyvim-docker-backup-[timestamp]`
 
 ### 🗑️ remote-uninstall.sh
-**Purpose**: Complete removal of LazyVim Docker installation
+**Purpose**: Complete and safe removal of LazyVim Docker installation
 
 **Removal Process:**
-1. Stops all running containers
-2. Removes Docker containers and images
-3. Removes Docker volumes
-4. Removes installation directory
-5. Removes global `lazy` command
-6. Optionally cleans PATH from shell configs
-7. Creates backups before deletion
+1. Shows exactly what will be removed
+2. **Single confirmation prompt** - no additional questions
+3. Stops all running containers
+4. Removes Docker containers, images, and volumes
+5. Removes installation directory (`~/.local/share/lazyvim-docker`)
+6. Removes global `lazy` command and shell integrations
+7. Removes PATH modifications automatically
+8. Creates timestamped backups before any changes
 
-**Interactive Prompts:**
-- Confirm complete uninstall
-- Choose to remove PATH modifications
-- Option to keep or remove project files
+**Smart Detection:**
+- **Interactive mode**: Shows confirmation prompt when run manually
+- **Non-interactive mode**: Safely cancels when piped unless forced with `LAZYVIM_FORCE_UNINSTALL=true`
+- **Automatic backup**: Creates `.backup.[timestamp]` files before modifying shell configs
 
-**Cleanup Scope:**
-- Docker: containers, images, volumes
-- Files: installation directory, global command
-- Config: PATH modifications (optional)
+**Complete Cleanup:**
+- ✅ Docker: containers, images, volumes  
+- ✅ Files: installation directory, global command
+- ✅ Config: shell entries and PATH modifications
+- ✅ **Everything removed in one confirmation** - streamlined process
 
 ---
 
@@ -375,8 +396,23 @@ lazy build
 # Update to fix issues
 lazy update
 
-# Nuclear option
+# Nuclear option - complete reinstall
 lazy uninstall && curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/start.sh | bash
+```
+
+### Uninstallation Issues
+```bash
+# Script hangs when run via curl/pipe
+LAZYVIM_FORCE_UNINSTALL=true curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-uninstall.sh | bash
+
+# Manual cleanup if script fails
+docker stop lazyvim 2>/dev/null || true
+docker rm lazyvim 2>/dev/null || true  
+rm -rf ~/.local/share/lazyvim-docker
+rm -f ~/.local/bin/lazy
+
+# Clean terminal after uninstall
+exec $SHELL
 ```
 
 ---

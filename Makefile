@@ -164,9 +164,9 @@ install-global: ## Install global 'lazy' commands to use from anywhere
 	@echo "$(BLUE)Installing LazyVim Docker global commands...$(NC)"
 	@./scripts/install-global-commands.sh
 
-uninstall:
-	@echo "$(BLUE)Uninstalling LazyVim Docker...$(NC)"
-	@./scripts/uninstall-global-commands.sh
+uninstall: ## Complete uninstall - removes everything (same as curl method)
+	@echo "$(BLUE)Running complete LazyVim Docker uninstall...$(NC)"
+	@./scripts/remote-uninstall.sh
 
 install-remote:
 	@echo "$(BLUE)LazyVim Docker - Remote Installation$(NC)"

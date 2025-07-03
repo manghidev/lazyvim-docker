@@ -44,7 +44,7 @@ echo "  lazy status     -> make status"
 echo "  lazy build      -> make build"
 echo "  lazy health     -> make health"
 echo "  lazy help       -> make help"
-echo "  lazy uninstall  -> Complete uninstall"
+echo "  lazy uninstall  -> Complete removal (same as curl method)"
 echo ""
 
 # Check if we're in the correct directory
@@ -101,7 +101,7 @@ lazy() {
         echo "  backup    Backup configurations"
         echo "  version   Show version"
         echo "  configure Reconfigure directories and timezone"
-        echo "  uninstall Remove global commands"
+        echo "  uninstall Complete removal (same as curl method)"
         echo ""
         echo "Examples:"
         echo "  lazy enter     # Enter LazyVim from anywhere"
@@ -118,8 +118,8 @@ lazy() {
             (cd "\$lazyvim_docker_path" && make "\$cmd" "\$@")
             ;;
         uninstall)
-            echo "🗑️  Running uninstaller..."
-            (cd "\$lazyvim_docker_path" && ./scripts/uninstall-global-commands.sh)
+            echo "🗑️  Running complete uninstaller..."
+            (cd "\$lazyvim_docker_path" && ./scripts/remote-uninstall.sh)
             ;;
         *)
             echo "❌ Unknown command: \$cmd"
@@ -190,7 +190,7 @@ lazy() {
         echo "  backup    Backup configurations"
         echo "  version   Show version"
         echo "  configure Reconfigure directories and timezone"
-        echo "  uninstall Remove global commands"
+        echo "  uninstall Complete removal (same as curl method)"
         echo ""
         echo "Examples:"
         echo "  lazy enter     # Enter LazyVim from anywhere"
@@ -207,8 +207,8 @@ lazy() {
             (cd "\$lazyvim_docker_path" && make "\$cmd" "\$@")
             ;;
         uninstall)
-            echo "🗑️  Running uninstaller..."
-            (cd "\$lazyvim_docker_path" && ./scripts/uninstall-global-commands.sh)
+            echo "🗑️  Running complete uninstaller..."
+            (cd "\$lazyvim_docker_path" && ./scripts/remote-uninstall.sh)
             ;;
         *)
             echo "❌ Unknown command: \$cmd"

@@ -14,23 +14,25 @@ NC='\033[0m'
 
 # Functions
 log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
+    printf "${BLUE}[INFO]${NC} %s\n" "$1"
 }
 
 log_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
+    printf "${GREEN}[SUCCESS]${NC} %s\n" "$1"
 }
 
 log_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
+    printf "${YELLOW}[WARNING]${NC} %s\n" "$1"
 }
 
 log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+    printf "${RED}[ERROR]${NC} %s\n" "$1"
 }
 
 # Get the absolute path of the lazyvim-docker directory
 LAZYVIM_DOCKER_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Remove the /scripts part from the path
+LAZYVIM_DOCKER_PATH="$(dirname "$LAZYVIM_DOCKER_PATH")"
 
 log_info "LazyVim Docker Global Commands Installer"
 echo ""
@@ -46,8 +48,8 @@ echo "  lazy uninstall  -> Complete uninstall"
 echo ""
 
 # Check if we're in the correct directory
-if [[ ! -f "Makefile" ]] || [[ ! -f "docker-compose.yml" ]]; then
-    log_error "This script must be run from the lazyvim-docker directory"
+if [[ ! -f "$LAZYVIM_DOCKER_PATH/Makefile" ]] || [[ ! -f "$LAZYVIM_DOCKER_PATH/docker-compose.yml" ]]; then
+    log_error "LazyVim Docker project not found at: $LAZYVIM_DOCKER_PATH"
     exit 1
 fi
 
@@ -59,8 +61,12 @@ install_zsh() {
     
     # Remove existing installation if present
     if grep -q "$marker_start" "$shell_config" 2>/dev/null; then
-        log_info "Removing existing installation..."
-        sed -i.bak "/$marker_start/,/$marker_end/d" "$shell_config"
+        log_info "Removing existing installation from Zsh..."
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            sed -i '' "/$marker_start/,/$marker_end/d" "$shell_config"
+        else
+            sed -i "/$marker_start/,/$marker_end/d" "$shell_config"
+        fi
     fi
     
     log_info "Installing global commands for Zsh..."
@@ -94,14 +100,12 @@ lazy() {
         echo "  logs      Show container logs"
         echo "  backup    Backup configurations"
         echo "  version   Show version"
+        echo "  configure Reconfigure directories and timezone"
         echo "  uninstall Remove global commands"
         echo ""
         echo "Examples:"
         echo "  lazy enter     # Enter LazyVim from anywhere"
-        echo "  lazy status    # Check container status"
-        echo "  lazy health    # Run full diagnostics"
-        echo "  lazy uninstall # Remove global commands"
-        echo ""
+        echo "  lazy build     # Build the environment"
         return 0
     fi
     
@@ -115,7 +119,7 @@ lazy() {
             ;;
         uninstall)
             echo "🗑️  Running uninstaller..."
-            (cd "\$lazyvim_docker_path" && bash uninstall-global-commands.sh)
+            (cd "\$lazyvim_docker_path" && ./scripts/uninstall-global-commands.sh)
             ;;
         *)
             echo "❌ Unknown command: \$cmd"
@@ -125,15 +129,13 @@ lazy() {
     esac
 }
 
-# Tab completion for lazy command
-_lazy_completion() {
+# Tab completion for lazy command (Zsh)
+_lazy_zsh_completion() {
     local commands=(help start enter stop status health build restart destroy clean quick logs backup configure version uninstall)
-    _describe 'commands' commands
+    _describe 'lazy commands' commands
 }
 
-if [[ -n "\$ZSH_VERSION" ]]; then
-    compdef _lazy_completion lazy
-fi
+compdef _lazy_zsh_completion lazy
 $marker_end
 EOF
 
@@ -148,8 +150,12 @@ install_bash() {
     
     # Remove existing installation if present
     if grep -q "$marker_start" "$shell_config" 2>/dev/null; then
-        log_info "Removing existing installation..."
-        sed -i.bak "/$marker_start/,/$marker_end/d" "$shell_config"
+        log_info "Removing existing installation from Bash..."
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            sed -i '' "/$marker_start/,/$marker_end/d" "$shell_config"
+        else
+            sed -i "/$marker_start/,/$marker_end/d" "$shell_config"
+        fi
     fi
     
     log_info "Installing global commands for Bash..."
@@ -182,17 +188,13 @@ lazy() {
         echo "  quick     Quick start (build + enter)"
         echo "  logs      Show container logs"
         echo "  backup    Backup configurations"
-        echo "  configure Reconfigure directories and timezone"
         echo "  version   Show version"
+        echo "  configure Reconfigure directories and timezone"
         echo "  uninstall Remove global commands"
         echo ""
         echo "Examples:"
         echo "  lazy enter     # Enter LazyVim from anywhere"
-        echo "  lazy status    # Check container status"
-        echo "  lazy health    # Run full diagnostics"
-        echo "  lazy configure # Reconfigure directories and timezone"
-        echo "  lazy uninstall # Remove global commands"
-        echo ""
+        echo "  lazy build     # Build the environment"
         return 0
     fi
     
@@ -206,7 +208,7 @@ lazy() {
             ;;
         uninstall)
             echo "🗑️  Running uninstaller..."
-            (cd "\$lazyvim_docker_path" && bash uninstall-global-commands.sh)
+            (cd "\$lazyvim_docker_path" && ./scripts/uninstall-global-commands.sh)
             ;;
         *)
             echo "❌ Unknown command: \$cmd"
@@ -216,7 +218,7 @@ lazy() {
     esac
 }
 
-# Tab completion for lazy command (basic)
+# Tab completion for lazy command (Bash)
 _lazy_completion() {
     local cur="\${COMP_WORDS[COMP_CWORD]}"
     local commands="help start enter stop status health build restart destroy clean quick logs backup configure version uninstall"
@@ -230,34 +232,52 @@ EOF
     log_success "Bash configuration updated!"
 }
 
-# Detect current shell and install accordingly
-if [[ -n "$ZSH_VERSION" ]]; then
-    install_zsh
-elif [[ -n "$BASH_VERSION" ]]; then
+# Main installation function
+install_global_commands() {
+    log_info "Installing global commands for both Bash and Zsh..."
+    
+    # Ensure shell config files exist
+    touch "$HOME/.bashrc" "$HOME/.zshrc"
+    
+    # Install for both shells
     install_bash
-else
-    log_warning "Unsupported shell. Installing for Zsh by default..."
     install_zsh
-fi
+    
+    echo ""
+    log_success "✓ Global 'lazy' commands installed!"
+    echo ""
+    log_info "Commands installed for both Bash and Zsh:"
+    echo "  • Bash: $HOME/.bashrc"
+    echo "  • Zsh: $HOME/.zshrc"
+    echo ""
+    log_info "Usage:"
+    echo "  lazy enter     # Enter LazyVim development environment"
+    echo "  lazy help      # Show all available commands"
+    echo ""
+    log_info "To activate:"
+    echo "  • Restart your terminal, or"
+    echo "  • Run: source ~/.bashrc   (for Bash)"
+    echo "  • Run: source ~/.zshrc    (for Zsh)"
+    echo ""
+    
+    # Detect current shell and provide specific activation command
+    local current_shell=""
+    if [[ -n "$ZSH_VERSION" ]]; then
+        current_shell="zsh"
+        printf "${GREEN}For your current Zsh session, run: source ~/.zshrc${NC}\n"
+    elif [[ -n "$BASH_VERSION" ]]; then
+        current_shell="bash"
+        printf "${GREEN}For your current Bash session, run: source ~/.bashrc${NC}\n"
+    elif [[ "$SHELL" == *"zsh"* ]]; then
+        current_shell="zsh"
+        printf "${GREEN}For your current Zsh session, run: source ~/.zshrc${NC}\n"
+    else
+        current_shell="bash"
+        printf "${GREEN}For your current Bash session, run: source ~/.bashrc${NC}\n"
+    fi
+    
+    echo ""
+}
 
-echo ""
-log_success "Global commands installed successfully!"
-echo ""
-log_info "To start using the commands:"
-echo ""
-if [[ -n "$ZSH_VERSION" ]]; then
-    echo "  source ~/.zshrc"
-else
-    echo "  source ~/.bashrc"
-fi
-echo ""
-log_info "Or restart your terminal."
-echo ""
-log_info "Then you can use from anywhere:"
-echo "  ${GREEN}lazy enter${NC}     # Enter LazyVim"
-echo "  ${GREEN}lazy status${NC}    # Check status"
-echo "  ${GREEN}lazy health${NC}    # Run diagnostics"
-echo "  ${GREEN}lazy${NC}           # Show all commands"
-echo ""
-log_warning "Note: The 'lazy' command will always execute from:"
-echo "  $LAZYVIM_DOCKER_PATH"
+# Run the installation
+install_global_commands

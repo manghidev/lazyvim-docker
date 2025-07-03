@@ -17,18 +17,18 @@ NC='\033[0m'
 
 # Validate bump type
 if [[ ! "$BUMP_TYPE" =~ ^(patch|minor|major)$ ]]; then
-    echo -e "${RED}Error: Invalid bump type. Use: patch, minor, or major${NC}"
+    printf "${RED}Error: Invalid bump type. Use: patch, minor, or major${NC}\n"
     exit 1
 fi
 
 # Read current version
 if [[ ! -f "$VERSION_FILE" ]]; then
-    echo -e "${RED}Error: VERSION file not found${NC}"
+    printf "${RED}Error: VERSION file not found${NC}\n"
     exit 1
 fi
 
 CURRENT_VERSION=$(cat "$VERSION_FILE")
-echo -e "${BLUE}Current version: $CURRENT_VERSION${NC}"
+printf "${BLUE}Current version: $CURRENT_VERSION${NC}\n"
 
 # Parse version components
 IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
@@ -56,13 +56,13 @@ NEW_VERSION="$MAJOR.$MINOR.$PATCH"
 
 # Write new version
 echo "$NEW_VERSION" > "$VERSION_FILE"
-echo -e "${GREEN}Version bumped to: $NEW_VERSION${NC}"
+printf "${GREEN}Version bumped to: $NEW_VERSION${NC}\n"
 
 # Git commit if in a git repository
 if git rev-parse --git-dir > /dev/null 2>&1; then
-    echo -e "${YELLOW}Committing version bump...${NC}"
+    printf "${YELLOW}Committing version bump...${NC}\n"
     git add "$VERSION_FILE"
     git commit -m "Bump version to $NEW_VERSION"
     git tag "v$NEW_VERSION"
-    echo -e "${GREEN}Version committed and tagged${NC}"
+    printf "${GREEN}Version committed and tagged${NC}\n"
 fi

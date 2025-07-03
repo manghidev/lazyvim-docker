@@ -5,14 +5,24 @@
 
 set -e
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-PURPLE='\033[0;35m'
-CYAN='\033[0;36m'
-NC='\033[0m' # No Color
+# Colors for output using tput (more compatible)
+if command -v tput >/dev/null 2>&1 && [[ -t 1 ]]; then
+    RED=$(tput setaf 1 2>/dev/null || echo '')
+    GREEN=$(tput setaf 2 2>/dev/null || echo '')
+    YELLOW=$(tput setaf 3 2>/dev/null || echo '')
+    BLUE=$(tput setaf 4 2>/dev/null || echo '')
+    PURPLE=$(tput setaf 5 2>/dev/null || echo '')
+    CYAN=$(tput setaf 6 2>/dev/null || echo '')
+    NC=$(tput sgr0 2>/dev/null || echo '')
+else
+    RED=''
+    GREEN=''
+    YELLOW=''
+    BLUE=''
+    PURPLE=''
+    CYAN=''
+    NC=''
+fi
 
 # Configuration
 INSTALL_DIR="$HOME/.local/share/lazyvim-docker"
@@ -20,30 +30,71 @@ BIN_DIR="$HOME/.local/bin"
 
 # Print functions
 print_header() {
-    echo -e "${CYAN}╔══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║             LazyVim Docker - Uninstaller                    ║${NC}"
-    echo -e "${CYAN}╚══════════════════════════════════════════════════════════════╝${NC}"
-    echo ""
+    printf "${CYAN}╔══════════════════════════════════════════════════════════════╗${NC}\n"
+    printf "${CYAN}║             LazyVim Docker - Uninstaller                    ║${NC}\n"
+    printf "${CYAN}╚══════════════════════════════════════════════════════════════╝${NC}\n"
+    printf "\n"
 }
 
 print_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
+    printf "${BLUE}[INFO]${NC} %s\n" "$1"
 }
 
 print_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
+    printf "${GREEN}[SUCCESS]${NC} %s\n" "$1"
 }
 
 print_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
+    printf "${YELLOW}[WARNING]${NC} %s\n" "$1"
 }
 
 print_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+    printf "${RED}[ERROR]${NC} %s\n" "$1"
 }
 
 print_step() {
-    echo -e "${PURPLE}[STEP]${NC} $1"
+    printf "${PURPLE}[STEP]${NC} %s\n" "$1"
+}
+
+# Smart terminal restart for clean environment
+restart_terminal() {
+    print_step "Setting up terminal cleanup..."
+    
+    # Detect current shell
+    local current_shell=""
+    if [ -n "$SHELL" ]; then
+        case "$SHELL" in
+            */zsh) current_shell="zsh" ;;
+            */bash) current_shell="bash" ;;
+            *) current_shell="bash" ;;
+        esac
+    else
+        current_shell="bash"
+    fi
+    
+    print_info "Detected shell: $current_shell"
+    
+    # Create a helper script for easy restart
+    local helper_script="/tmp/lazyvim_cleanup_terminal.sh"
+    cat > "$helper_script" << 'EOF'
+#!/bin/bash
+echo "🧹 Restarting terminal to complete LazyVim Docker cleanup..."
+echo ""
+EOF
+    echo "exec $current_shell" >> "$helper_script"
+    chmod +x "$helper_script"
+    
+    echo ""
+    print_warning "🧹 To complete cleanup and remove any traces:"
+    echo ""
+    printf "  ${GREEN}Option 1 (Easiest):${NC}\n"
+    printf "    ${GREEN}%s${NC}\n" "$helper_script"
+    echo ""
+    printf "  ${GREEN}Option 2 (Manual):${NC}\n"
+    printf "    ${GREEN}exec %s${NC}\n" "$current_shell"
+    echo ""
+    print_info "💡 Copy and paste the first command to clean your terminal"
+    print_info "This ensures no traces of 'lazy' commands remain"
 }
 
 # Stop and remove Docker containers
@@ -96,6 +147,40 @@ remove_installation() {
     fi
 }
 
+# Remove global commands from shell configurations
+remove_shell_commands() {
+    print_step "Removing global commands from shell configurations..."
+    
+    local configs=("$HOME/.bashrc" "$HOME/.zshrc" "$HOME/.bash_profile")
+    local marker_start="# LazyVim Docker Global Commands - START"
+    local marker_end="# LazyVim Docker Global Commands - END"
+    local removed_any=false
+    
+    for config in "${configs[@]}"; do
+        if [[ -f "$config" ]] && grep -q "$marker_start" "$config" 2>/dev/null; then
+            print_info "Removing commands from: $config"
+            
+            # Create backup
+            cp "$config" "${config}.backup.$(date +%Y%m%d-%H%M%S)"
+            
+            # Remove the section between markers
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                sed -i '' "/$marker_start/,/$marker_end/d" "$config"
+            else
+                sed -i "/$marker_start/,/$marker_end/d" "$config"
+            fi
+            
+            removed_any=true
+        fi
+    done
+    
+    if [[ "$removed_any" == true ]]; then
+        print_success "Global commands removed from shell configurations"
+    else
+        print_info "No global commands found in shell configurations"
+    fi
+}
+
 # Remove global command
 remove_global_command() {
     print_step "Removing global command..."
@@ -108,40 +193,38 @@ remove_global_command() {
     fi
 }
 
-# Remove PATH modifications (optional)
+# Remove PATH modifications automatically
 remove_path_modifications() {
-    echo ""
-    echo -n "Do you want to remove PATH modifications from shell config? [y/N]: "
-    read -r response
+    print_step "Removing PATH modifications..."
     
-    case "$response" in
-        [yY][eE][sS]|[yY])
-            print_step "Removing PATH modifications..."
+    local shell_configs=("$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.bash_profile")
+    local removed_any=false
+    
+    for config in "${shell_configs[@]}"; do
+        if [ -f "$config" ]; then
+            # Create backup
+            cp "$config" "${config}.backup.$(date +%Y%m%d-%H%M%S)"
             
-            local shell_configs=("$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.bash_profile")
-            
-            for config in "${shell_configs[@]}"; do
-                if [ -f "$config" ]; then
-                    # Create backup
-                    cp "$config" "${config}.backup.$(date +%Y%m%d-%H%M%S)"
-                    
-                    # Remove LazyVim Docker PATH modifications
-                    sed -i.tmp '/# LazyVim Docker - Add local bin to PATH/d' "$config" 2>/dev/null || true
-                    sed -i.tmp '/export PATH=.*\.local\/bin.*PATH/d' "$config" 2>/dev/null || true
-                    rm -f "${config}.tmp"
-                    
-                    print_info "Cleaned PATH modifications from: $config"
-                fi
-            done
-            
-            print_success "PATH modifications removed"
-            ;;
-        *)
-            print_info "PATH modifications preserved"
-            ;;
-    esac
+            # Remove LazyVim Docker PATH modifications
+            if grep -q "LazyVim Docker" "$config" 2>/dev/null; then
+                sed -i.tmp '/# LazyVim Docker - Add local bin to PATH/d' "$config" 2>/dev/null || true
+                sed -i.tmp '/export PATH=.*\.local\/bin.*PATH/d' "$config" 2>/dev/null || true
+                rm -f "${config}.tmp"
+                
+                print_info "Cleaned PATH modifications from: $config"
+                removed_any=true
+            fi
+        fi
+    done
+    
+    if [[ "$removed_any" == true ]]; then
+        print_success "PATH modifications removed"
+    else
+        print_info "No PATH modifications found"
+    fi
 }
 
+# Confirm uninstallation
 # Confirm uninstallation
 confirm_uninstall() {
     echo ""
@@ -151,8 +234,33 @@ confirm_uninstall() {
     echo "  • Global 'lazy' command"
     echo "  • All data and configurations"
     echo ""
-    echo -n "Are you sure you want to continue? [y/N]: "
-    read -r response
+    
+    # Try to read from terminal, fallback to stdin if needed
+    printf "Are you sure you want to continue? [y/N]: "
+    local response
+    
+    # Try multiple methods to read input
+    if read -r response < /dev/tty 2>/dev/null; then
+        # Successfully read from terminal
+        :
+    elif [[ -t 0 ]]; then
+        # stdin is a terminal, try regular read
+        read -r response
+    else
+        # Non-interactive mode or piped input
+        if [[ "${LAZYVIM_FORCE_UNINSTALL:-}" == "true" ]]; then
+            print_info "Non-interactive mode: proceeding with forced uninstall (LAZYVIM_FORCE_UNINSTALL=true)"
+            response="y"
+        else
+            print_info "Non-interactive mode: uninstallation cancelled for safety"
+            print_info "To force uninstall via pipe, set: LAZYVIM_FORCE_UNINSTALL=true"
+            print_info ""
+            print_info "Examples:"
+            printf "  ${GREEN}LAZYVIM_FORCE_UNINSTALL=true curl -fsSL [URL] | bash${NC}\n"
+            printf "  ${GREEN}curl -fsSL [URL] | LAZYVIM_FORCE_UNINSTALL=true bash${NC}\n"
+            exit 0
+        fi
+    fi
     
     case "$response" in
         [yY][eE][sS]|[yY])
@@ -177,6 +285,7 @@ main() {
     cleanup_docker
     remove_installation
     remove_global_command
+    remove_shell_commands
     remove_path_modifications
     
     echo ""
@@ -190,8 +299,11 @@ main() {
     print_info "Thank you for using LazyVim Docker! 🚀"
     echo ""
     print_info "To reinstall later, run:"
-    echo "  ${GREEN}curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-install.sh | bash${NC}"
+    printf "  ${GREEN}curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/start.sh | bash${NC}\n"
     echo ""
+    
+    # Restart terminal to clean up environment
+    restart_terminal
 }
 
 # Run main function

@@ -41,9 +41,6 @@ lazy uninstall
 
 # Or run directly 
 curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-uninstall.sh | bash
-
-# Automated uninstall (no prompts - for scripts/CI)
-LAZYVIM_FORCE_UNINSTALL=true curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-uninstall.sh | bash
 ```
 
 **Removes everything**: Docker containers, installation files, global commands, and shell configurations in one step.
@@ -144,9 +141,6 @@ lazy uninstall
 
 # Or run directly with prompts
 curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-uninstall.sh | bash
-
-# Force uninstall without prompts (for automation/CI)
-LAZYVIM_FORCE_UNINSTALL=true curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-uninstall.sh | bash
 ```
 
 **What it does when you confirm:**
@@ -163,9 +157,6 @@ LAZYVIM_FORCE_UNINSTALL=true curl -fsSL https://raw.githubusercontent.com/manghi
 - 🛡️ **Non-interactive safety** - Cancels by default when piped unless forced
 - 🛡️ **Automatic backups** - Creates backups of modified configuration files  
 - 🛡️ **Clear messaging** - Shows progress and results of each step
-
-**Environment Variables:**
-- `LAZYVIM_FORCE_UNINSTALL=true` - Force uninstall without confirmation (for automation)
 
 ---
 
@@ -229,7 +220,6 @@ LAZYVIM_FORCE_UNINSTALL=true curl -fsSL https://raw.githubusercontent.com/manghi
 
 **Smart Detection:**
 - **Interactive mode**: Shows confirmation prompt when run manually
-- **Non-interactive mode**: Safely cancels when piped unless forced with `LAZYVIM_FORCE_UNINSTALL=true`
 - **Automatic backup**: Creates `.backup.[timestamp]` files before modifying shell configs
 
 **Complete Cleanup:**
@@ -398,21 +388,6 @@ lazy update
 
 # Nuclear option - complete reinstall
 lazy uninstall && curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/start.sh | bash
-```
-
-### Uninstallation Issues
-```bash
-# Script hangs when run via curl/pipe
-LAZYVIM_FORCE_UNINSTALL=true curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-uninstall.sh | bash
-
-# Manual cleanup if script fails
-docker stop lazyvim 2>/dev/null || true
-docker rm lazyvim 2>/dev/null || true  
-rm -rf ~/.local/share/lazyvim-docker
-rm -f ~/.local/bin/lazy
-
-# Clean terminal after uninstall
-exec $SHELL
 ```
 
 ---

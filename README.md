@@ -411,7 +411,7 @@ lazy uninstall && curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim
 🌐 [Personal Website](https://manghi.dev)  
 📧 [GitHub Issues](https://github.com/manghidev/lazyvim-docker/issues)
 
-**License:** MIT - See [LICENSE](LICENSE) file
+**License:** GPLv3 - See [LICENSE](LICENSE) file
 
 **Additional Resources:**
 - [LazyVim Docs](https://lazyvim.github.io/) | [Neovim Docs](https://neovim.io/doc/)

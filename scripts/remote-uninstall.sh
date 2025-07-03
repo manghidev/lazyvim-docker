@@ -5,14 +5,24 @@
 
 set -e
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-PURPLE='\033[0;35m'
-CYAN='\033[0;36m'
-NC='\033[0m' # No Color
+# Colors for output using tput (more compatible)
+if command -v tput >/dev/null 2>&1 && [[ -t 1 ]]; then
+    RED=$(tput setaf 1 2>/dev/null || echo '')
+    GREEN=$(tput setaf 2 2>/dev/null || echo '')
+    YELLOW=$(tput setaf 3 2>/dev/null || echo '')
+    BLUE=$(tput setaf 4 2>/dev/null || echo '')
+    PURPLE=$(tput setaf 5 2>/dev/null || echo '')
+    CYAN=$(tput setaf 6 2>/dev/null || echo '')
+    NC=$(tput sgr0 2>/dev/null || echo '')
+else
+    RED=''
+    GREEN=''
+    YELLOW=''
+    BLUE=''
+    PURPLE=''
+    CYAN=''
+    NC=''
+fi
 
 # Configuration
 INSTALL_DIR="$HOME/.local/share/lazyvim-docker"
@@ -84,21 +94,26 @@ EOF
     printf "    ${GREEN}exec %s${NC}\n" "$current_shell"
     echo ""
     
-    # Try to detect if we can restart directly
-    if [[ -t 0 ]] && [[ -t 1 ]] && [[ $- == *i* ]]; then
+    # Check if we can actually read from terminal (not piped)
+    if [[ -t 0 ]] && [[ -t 1 ]] && [[ ! -p /dev/stdin ]]; then
+        # Interactive mode - try to read from terminal directly
         print_info "✨ Auto-cleanup available!"
-        local choice
         printf "Press ENTER to restart now, or 'n' to skip cleanup: "
-        read -r choice
-        
-        if [[ "$choice" != "n" ]] && [[ "$choice" != "N" ]]; then
-            print_info "Restarting terminal for clean environment..."
-            exec "$current_shell"
+        local choice
+        if read -r choice < /dev/tty 2>/dev/null; then
+            if [[ "$choice" != "n" ]] && [[ "$choice" != "N" ]]; then
+                print_info "Restarting terminal for clean environment..."
+                exec "$current_shell"
+            else
+                print_info "Cleanup skipped - environment may show command traces"
+            fi
         else
-            print_info "Cleanup skipped - environment may show command traces"
+            print_info "💡 Copy and paste the first command to clean your terminal"
+            print_info "This ensures no traces of 'lazy' commands remain"
         fi
     else
-        print_info "� Copy and paste the first command to clean your terminal"
+        # Non-interactive mode (piped or redirected)
+        print_info "💡 Copy and paste the first command to clean your terminal"
         print_info "This ensures no traces of 'lazy' commands remain"
     fi
 }
@@ -202,15 +217,65 @@ remove_global_command() {
 # Remove PATH modifications (optional)
 remove_path_modifications() {
     echo ""
-    printf "Do you want to remove PATH modifications from shell config? [y/N]: "
-    if [[ -t 0 ]] && [[ -t 1 ]] && [[ $- == *i* ]]; then
-        read -r response </dev/tty
-    else
-        read -r response
-    fi
     
-    case "$response" in
-        [yY][eE][sS]|[yY])
+    # Check if we can actually read from terminal (not piped)
+    if [[ -t 0 ]] && [[ -t 1 ]] && [[ ! -p /dev/stdin ]]; then
+        # Interactive mode - try to read from terminal directly
+        printf "Do you want to remove PATH modifications from shell config? [y/N]: "
+        local response
+        if read -r response < /dev/tty 2>/dev/null; then
+            # Successfully read from terminal
+            case "$response" in
+                [yY][eE][sS]|[yY])
+                    print_step "Removing PATH modifications..."
+                    
+                    local shell_configs=("$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.bash_profile")
+                    
+                    for config in "${shell_configs[@]}"; do
+                        if [ -f "$config" ]; then
+                            # Create backup
+                            cp "$config" "${config}.backup.$(date +%Y%m%d-%H%M%S)"
+                            
+                            # Remove LazyVim Docker PATH modifications
+                            sed -i.tmp '/# LazyVim Docker - Add local bin to PATH/d' "$config" 2>/dev/null || true
+                            sed -i.tmp '/export PATH=.*\.local\/bin.*PATH/d' "$config" 2>/dev/null || true
+                            rm -f "${config}.tmp"
+                            
+                            print_info "Cleaned PATH modifications from: $config"
+                        fi
+                    done
+                    
+                    print_success "PATH modifications removed"
+                    ;;
+                *)
+                    print_info "PATH modifications preserved"
+                    ;;
+            esac
+        else
+            # Failed to read from terminal - treat as non-interactive
+            if [[ "${LAZYVIM_REMOVE_PATH:-}" == "true" ]]; then
+                print_info "Non-interactive mode: removing PATH modifications (LAZYVIM_REMOVE_PATH=true)"
+                # Remove PATH logic here...
+                print_step "Removing PATH modifications..."
+                local shell_configs=("$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.bash_profile")
+                for config in "${shell_configs[@]}"; do
+                    if [ -f "$config" ]; then
+                        cp "$config" "${config}.backup.$(date +%Y%m%d-%H%M%S)"
+                        sed -i.tmp '/# LazyVim Docker - Add local bin to PATH/d' "$config" 2>/dev/null || true
+                        sed -i.tmp '/export PATH=.*\.local\/bin.*PATH/d' "$config" 2>/dev/null || true
+                        rm -f "${config}.tmp"
+                        print_info "Cleaned PATH modifications from: $config"
+                    fi
+                done
+                print_success "PATH modifications removed"
+            else
+                print_info "Non-interactive mode: keeping PATH modifications"
+            fi
+        fi
+    else
+        # Non-interactive mode (piped or redirected)
+        if [[ "${LAZYVIM_REMOVE_PATH:-}" == "true" ]]; then
+            print_info "Non-interactive mode: removing PATH modifications (LAZYVIM_REMOVE_PATH=true)"
             print_step "Removing PATH modifications..."
             
             local shell_configs=("$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.bash_profile")
@@ -230,11 +295,10 @@ remove_path_modifications() {
             done
             
             print_success "PATH modifications removed"
-            ;;
-        *)
-            print_info "PATH modifications preserved"
-            ;;
-    esac
+        else
+            print_info "Non-interactive mode: keeping PATH modifications"
+        fi
+    fi
 }
 
 # Confirm uninstallation
@@ -246,22 +310,49 @@ confirm_uninstall() {
     echo "  • Global 'lazy' command"
     echo "  • All data and configurations"
     echo ""
-    printf "Are you sure you want to continue? [y/N]: "
-    if [[ -t 0 ]] && [[ -t 1 ]] && [[ $- == *i* ]]; then
-        read -r response </dev/tty
-    else
-        read -r response
-    fi
     
-    case "$response" in
-        [yY][eE][sS]|[yY])
+    # Check if we can actually read from terminal (not piped)
+    if [[ -t 0 ]] && [[ -t 1 ]] && [[ ! -p /dev/stdin ]]; then
+        # Interactive mode - try to read from terminal directly
+        printf "Are you sure you want to continue? [y/N]: "
+        local response
+        if read -r response < /dev/tty 2>/dev/null; then
+            # Successfully read from terminal
+            case "$response" in
+                [yY][eE][sS]|[yY])
+                    return 0
+                    ;;
+                *)
+                    print_info "Uninstallation cancelled"
+                    exit 0
+                    ;;
+            esac
+        else
+            # Failed to read from terminal - treat as non-interactive
+            print_info "Cannot read from terminal - treating as non-interactive"
+            if [[ "${LAZYVIM_FORCE_UNINSTALL:-}" == "true" ]]; then
+                print_info "Proceeding with forced uninstall (LAZYVIM_FORCE_UNINSTALL=true)"
+                return 0
+            else
+                print_info "Uninstallation cancelled - to force, set: LAZYVIM_FORCE_UNINSTALL=true"
+                exit 0
+            fi
+        fi
+    else
+        # Non-interactive mode (piped or redirected)
+        if [[ "${LAZYVIM_FORCE_UNINSTALL:-}" == "true" ]]; then
+            print_info "Non-interactive mode: proceeding with forced uninstall (LAZYVIM_FORCE_UNINSTALL=true)"
             return 0
-            ;;
-        *)
-            print_info "Uninstallation cancelled"
+        else
+            print_info "Non-interactive mode: uninstallation cancelled for safety"
+            print_info "To force uninstall via pipe, set: LAZYVIM_FORCE_UNINSTALL=true"
+            print_info ""
+            print_info "Examples:"
+            printf "  ${GREEN}LAZYVIM_FORCE_UNINSTALL=true curl -fsSL [URL] | bash${NC}\n"
+            printf "  ${GREEN}curl -fsSL [URL] | LAZYVIM_FORCE_UNINSTALL=true bash${NC}\n"
             exit 0
-            ;;
-    esac
+        fi
+    fi
 }
 
 # Main uninstallation process

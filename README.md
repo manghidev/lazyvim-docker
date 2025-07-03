@@ -123,11 +123,17 @@ curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scrip
 **`remote-uninstall.sh`** - Complete cleanup
 
 ```bash
-# Uninstall everything with prompts
+# Interactive uninstall with prompts
 lazy uninstall
 
-# Or run directly
+# Or run directly with prompts
 curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-uninstall.sh | bash
+
+# Force uninstall without prompts (CI/automation)
+curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-uninstall.sh | LAZYVIM_FORCE_UNINSTALL=true bash
+
+# Force uninstall with PATH cleanup
+curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-uninstall.sh | LAZYVIM_FORCE_UNINSTALL=true LAZYVIM_REMOVE_PATH=true bash
 ```
 
 **What it does:**
@@ -136,7 +142,11 @@ curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scrip
 - ✅ Removes global `lazy` command
 - ✅ Optionally cleans PATH modifications from shell configs
 - ✅ Creates backups before making changes
-- ✅ Interactive prompts for safety
+- ✅ Interactive prompts for safety (or force mode for automation)
+
+**Environment Variables:**
+- `LAZYVIM_FORCE_UNINSTALL=true` - Skip confirmation prompts
+- `LAZYVIM_REMOVE_PATH=true` - Automatically remove PATH modifications
 
 ---
 

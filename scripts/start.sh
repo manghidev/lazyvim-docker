@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# LazyVim Docker - One-Command Setup
-# Automatic installation with smart defaults - no questions asked!
-# Usage: curl -fsSL https://raw.githubusercontent.com/USER/lazyvim-docker/main/scripts/start.sh | bash
+# LazyVim Docker - Simple Remote Installation Script
+# This version uses smart defaults and skips interactive configuration
+# Perfect for automated installations or when interactive input fails
 
 set -e
 
@@ -21,95 +21,35 @@ REPO_NAME="lazyvim-docker"
 INSTALL_DIR="$HOME/.local/share/lazyvim-docker"
 BIN_DIR="$HOME/.local/bin"
 TEMP_DIR="/tmp/lazyvim-docker-install"
-BRANCH="${LAZYVIM_BRANCH:-develop}"
+BRANCH="${LAZYVIM_BRANCH:-main}"
 
 # Print functions
 print_header() {
-    printf "${CYAN}╔══════════════════════════════════════════════════════════════╗${NC}\n"
-    printf "${CYAN}║                LazyVim Docker - Quick Start                 ║${NC}\n"
-    printf "${CYAN}║             One Command, Instant Development               ║${NC}\n"
-    printf "${CYAN}╚══════════════════════════════════════════════════════════════╝${NC}\n"
-    printf "\n"
+    echo -e "${CYAN}╔══════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║             LazyVim Docker - Simple Installer               ║${NC}"
+    echo -e "${CYAN}║                 Smart Defaults, Zero Input                  ║${NC}"
+    echo -e "${CYAN}╚══════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
 }
 
 print_info() {
-    printf "${BLUE}[INFO]${NC} %s\n" "$1"
+    echo -e "${BLUE}[INFO]${NC} $1"
 }
 
 print_success() {
-    printf "${GREEN}[SUCCESS]${NC} %s\n" "$1"
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
 }
 
 print_warning() {
-    printf "${YELLOW}[WARNING]${NC} %s\n" "$1"
+    echo -e "${YELLOW}[WARNING]${NC} $1"
 }
 
 print_error() {
-    printf "${RED}[ERROR]${NC} %s\n" "$1"
+    echo -e "${RED}[ERROR]${NC} $1"
 }
 
 print_step() {
-    printf "${PURPLE}[STEP]${NC} %s\n" "$1"
-}
-
-# Smart terminal restart with helper script
-restart_terminal() {
-    print_step "Setting up terminal restart..."
-    
-    # Detect current shell
-    local current_shell=""
-    if [ -n "$SHELL" ]; then
-        case "$SHELL" in
-            */zsh) current_shell="zsh" ;;
-            */bash) current_shell="bash" ;;
-            *) current_shell="bash" ;;
-        esac
-    else
-        current_shell="bash"
-    fi
-    
-    print_info "Detected shell: $current_shell"
-    
-    # Create a helper script for easy restart
-    local helper_script="/tmp/lazyvim_restart_terminal.sh"
-    cat > "$helper_script" << 'EOF'
-#!/bin/bash
-echo "🔄 Restarting terminal to activate LazyVim Docker commands..."
-echo ""
-EOF
-    echo "exec $current_shell" >> "$helper_script"
-    chmod +x "$helper_script"
-    
-    echo ""
-    print_warning "🔄 To activate 'lazy' commands, choose the EASIEST option:"
-    echo ""
-    printf "  ${GREEN}Option 1 (Easiest):${NC}\n"
-    printf "    ${GREEN}%s${NC}\n" "$helper_script"
-    echo ""
-    printf "  ${GREEN}Option 2 (Manual):${NC}\n"
-    printf "    ${GREEN}exec %s${NC}\n" "$current_shell"
-    echo ""
-    printf "  ${GREEN}Option 3 (Alternative):${NC}\n"
-    printf "    ${GREEN}source ~/.%src${NC}\n" "$current_shell"
-    echo ""
-    
-    # Try to detect if we can restart directly
-    if [[ -t 0 ]] && [[ -t 1 ]] && [[ $- == *i* ]]; then
-        print_info "✨ Auto-restart available!"
-        local choice
-        printf "Press ENTER to restart now, or 'n' to do it manually: "
-        read -r choice
-        
-        if [[ "$choice" != "n" ]] && [[ "$choice" != "N" ]]; then
-            print_info "Restarting terminal..."
-            exec "$current_shell"
-        else
-            print_info "Manual restart chosen - use the commands above"
-        fi
-    else
-        print_info "💡 Copy and paste the first command to restart your terminal"
-        printf "Then run: ${GREEN}lazy enter${NC}\n"
-    fi
+    echo -e "${PURPLE}[STEP]${NC} $1"
 }
 
 # Check if command exists
@@ -321,41 +261,8 @@ build_environment() {
     cd "$INSTALL_DIR"
     
     print_info "This may take a few minutes..."
-    
-    # Clean up existing environment
-    print_info "Cleaning up existing environment..."
-    docker compose down --rmi all --volumes 2>/dev/null || true
-    
-    # Pull latest base images
-    print_info "Pulling latest base images..."
-    docker compose pull 2>/dev/null || print_warning "Could not pull some images, continuing..."
-    
-    # Build the container
-    print_info "Building container..."
-    if docker compose build --no-cache 2>/dev/null; then
-        print_success "Container built successfully"
-        
-        # Start the container
-        print_info "Starting the container..."
-        if docker compose up --force-recreate -d 2>/dev/null; then
-            print_success "Container started successfully"
-            
-            # Wait for container to be ready
-            print_info "Waiting for container to be ready..."
-            sleep 3
-            
-            # Check if container is running
-            if docker compose ps 2>/dev/null | grep -q "Up"; then
-                print_success "Container is running!"
-                print_info "Opening shell in the container..."
-                # Don't try to open shell automatically - let user do it manually
-                print_info "You can enter the container with: lazy enter"
-            else
-                print_warning "Container may not have started properly. Check with 'lazy status'"
-            fi
-        else
-            print_warning "Failed to start container. You can try 'lazy start' later."
-        fi
+    if make build; then
+        print_success "Docker environment built successfully"
     else
         print_warning "Docker build failed, but installation completed. You can run 'lazy build' later."
     fi
@@ -396,23 +303,23 @@ main() {
     echo "  • Projects: Auto-mounted if exists"
     echo ""
     print_info "Usage:"
-    printf "  ${GREEN}lazy enter${NC}     # Enter LazyVim development environment\n"
-    printf "  ${GREEN}lazy start${NC}     # Start the container\n"
-    printf "  ${GREEN}lazy stop${NC}      # Stop the container\n"
-    printf "  ${GREEN}lazy status${NC}    # Check container status\n"
-    printf "  ${GREEN}lazy configure${NC} # Reconfigure directories and timezone\n"
-    printf "  ${GREEN}lazy update${NC}    # Update to latest version\n"
-    printf "  ${GREEN}lazy uninstall${NC} # Uninstall everything\n"
-    printf "  ${GREEN}lazy help${NC}      # Show all available commands\n"
+    echo "  ${GREEN}lazy enter${NC}     # Enter LazyVim development environment"
+    echo "  ${GREEN}lazy start${NC}     # Start the container"
+    echo "  ${GREEN}lazy stop${NC}      # Stop the container"
+    echo "  ${GREEN}lazy status${NC}    # Check container status"
+    echo "  ${GREEN}lazy configure${NC} # Reconfigure directories and timezone"
+    echo "  ${GREEN}lazy update${NC}    # Update to latest version"
+    echo "  ${GREEN}lazy uninstall${NC} # Uninstall everything"
+    echo "  ${GREEN}lazy help${NC}      # Show all available commands"
+    echo ""
+    print_info "To get started:"
+    echo "  1. Restart your terminal or run: ${YELLOW}source ~/.zshrc${NC} (or ~/.bashrc)"
+    echo "  2. Run: ${GREEN}lazy enter${NC}"
     echo ""
     print_info "To customize configuration later:"
-    printf "  Run: ${GREEN}lazy configure${NC}\n"
+    echo "  Run: ${GREEN}lazy configure${NC}"
     echo ""
     print_info "Happy coding! 🚀"
-    echo ""
-    
-    # Restart terminal to make commands available immediately
-    restart_terminal
 }
 
 # Run main function

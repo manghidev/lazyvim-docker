@@ -20,6 +20,9 @@ VERSION_FILE="VERSION"
 CONTAINER_NAME="lazyvim"
 DOTFILES_DIR=".dotfiles"
 
+# Source permission detection
+source "$(dirname "$0")/detect-permissions.sh"
+
 # Functions
 log_info() {
     printf "${BLUE}[INFO]${NC} %s\n" "$1"
@@ -47,8 +50,12 @@ VERSION=$(cat "$VERSION_FILE")
 # Get timezone from docker-compose.yml
 TIMEZONE=$(grep -A 10 "args:" docker-compose.yml | grep "TIMEZONE:" | awk '{print $2}' || echo "America/Mexico_City")
 
+# Detect and configure user permissions
+detect_user_permissions
+
 log_info "Building LazyVim Docker environment v$VERSION"
 log_info "Timezone: $TIMEZONE"
+log_info "User permissions: UID=$USER_UID, GID=$USER_GID"
 
 # Create .dotfiles directory if it doesn't exist
 if [[ ! -d "$DOTFILES_DIR" ]]; then
@@ -72,7 +79,7 @@ docker compose pull || log_warning "Could not pull some images, continuing..."
 
 # Build the container
 log_info "Building container with version $VERSION..."
-if docker compose build --build-arg VERSION="$VERSION" --no-cache; then
+if USER_UID=$USER_UID USER_GID=$USER_GID docker compose build --build-arg VERSION="$VERSION" --build-arg USER_UID="$USER_UID" --build-arg USER_GID="$USER_GID" --no-cache; then
     log_success "Container built successfully"
 else
     log_error "Failed to build container"
@@ -81,7 +88,7 @@ fi
 
 # Start the container
 log_info "Starting the container..."
-if docker compose up --force-recreate -d; then
+if USER_UID=$USER_UID USER_GID=$USER_GID docker compose up --force-recreate -d; then
     log_success "Container started successfully"
 else
     log_error "Failed to start container"

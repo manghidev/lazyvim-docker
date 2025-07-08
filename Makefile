@@ -19,6 +19,13 @@ VERSION := $(shell cat VERSION 2>/dev/null || echo "1.0.0")
 CONTAINER_NAME := lazyvim
 COMPOSE_FILE := docker-compose.yml
 
+# Detect user permissions for Linux compatibility
+USER_UID := $(shell if [ "$(shell uname)" = "Linux" ]; then id -u; else echo "1000"; fi)
+USER_GID := $(shell if [ "$(shell uname)" = "Linux" ]; then id -g; else echo "1000"; fi)
+
+# Docker compose with environment variables for Linux permission compatibility
+DOCKER_COMPOSE := USER_UID=$(USER_UID) USER_GID=$(USER_GID) docker compose
+
 help: ## Show this help message
 	@echo "$(BLUE)LazyVim Docker Environment - Available Commands$(NC)"
 	@echo ""

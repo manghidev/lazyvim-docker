@@ -48,7 +48,7 @@ fi
 
 VERSION=$(cat "$VERSION_FILE")
 # Get timezone from docker-compose.yml
-TIMEZONE=$(grep -A 10 "args:" docker-compose.yml | grep "TIMEZONE:" | awk '{print $2}' || echo "America/Mexico_City")
+TIMEZONE=$(grep -A 10 "args:" docker-compose.yml | grep "TIMEZONE:" | awk '{print $2}' || printf "America/Mexico_City")
 
 # Detect and configure user permissions
 detect_user_permissions

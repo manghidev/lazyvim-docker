@@ -38,12 +38,12 @@ log_error() {
 # Confirmation prompt
 log_warning "This will completely destroy the LazyVim Docker environment!"
 log_warning "This includes:"
-echo "  - Stopping and removing containers"
-echo "  - Removing Docker images"
-echo "  - Removing Docker volumes (configuration will be lost!)"
-echo ""
+printf "  - Stopping and removing containers\n"
+printf "  - Removing Docker images\n"
+printf "  - Removing Docker volumes (configuration will be lost!)\n"
+printf "\n"
 read -p "Are you sure you want to continue? (y/N): " -n 1 -r
-echo
+printf "\n"
 
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     log_info "Operation cancelled"

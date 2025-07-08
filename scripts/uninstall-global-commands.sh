@@ -106,9 +106,9 @@ remove_project_directory() {
     # Get parent directory (remove /scripts)
     project_dir="$(dirname "$project_dir")"
     
-    echo
+    printf "\n"
     print_status "Current project directory: $project_dir"
-    echo
+    printf "\n"
     printf "Do you want to remove the entire LazyVim Docker project directory? [y/N]: "
     if [[ -t 0 ]] && [[ -t 1 ]] && [[ $- == *i* ]]; then
         read -r response </dev/tty
@@ -167,17 +167,17 @@ main() {
     # Ask about removing project directory
     remove_project_directory
     
-    echo
+    printf "\n"
     print_success "Uninstallation completed!"
-    echo
+    printf "\n"
     print_status "What was removed:"
     print_status "  • Global 'lazy' command and tab completion"
     print_status "  • LazyVim Docker functions from shell configs"
-    echo
+    printf "\n"
     print_status "If you removed the project directory, all Docker containers and images were also cleaned up."
-    echo
+    printf "\n"
     print_status "Thank you for using LazyVim Docker! 🚀"
-    echo
+    printf "\n"
 }
 
 # Run main function

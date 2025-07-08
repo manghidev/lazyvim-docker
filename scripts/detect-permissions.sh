@@ -14,12 +14,12 @@ detect_user_permissions() {
             export USER_UID=$SUDO_UID
             export USER_GID=$SUDO_GID
         fi
-        echo "[INFO] Linux detected - Using UID:GID $USER_UID:$USER_GID for permission compatibility"
+        printf "[INFO] Linux detected - Using UID:GID %s:%s for permission compatibility\n" "$USER_UID" "$USER_GID"
     else
         # macOS/Windows - use default (Docker Desktop handles this automatically)
         export USER_UID=1000
         export USER_GID=1000
-        echo "[INFO] macOS/Windows detected - Using default UID:GID (Docker Desktop handles permissions)"
+        printf "[INFO] macOS/Windows detected - Using default UID:GID (Docker Desktop handles permissions)\n"
     fi
 }
 
@@ -29,6 +29,6 @@ export -f detect_user_permissions
 # If script is run directly, just detect and show the permissions
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     detect_user_permissions
-    echo "USER_UID=$USER_UID"
-    echo "USER_GID=$USER_GID"
+    printf "USER_UID=%s\n" "$USER_UID"
+    printf "USER_GID=%s\n" "$USER_GID"
 fi

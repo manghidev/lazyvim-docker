@@ -42,12 +42,12 @@ if ! docker info >/dev/null 2>&1; then
 fi
 
 # Check if container exists and its state
-CONTAINER_STATE=$(docker inspect "$CONTAINER_NAME" 2>/dev/null | grep '"Status"' | cut -d'"' -f4 || echo "missing")
+CONTAINER_STATE=$(docker inspect "$CONTAINER_NAME" 2>/dev/null | grep '"Status"' | cut -d'"' -f4 || printf "missing")
 
 if [ "$CONTAINER_STATE" = "missing" ]; then
     log_warning "Container not found. You may need to build it first."
     read -p "Do you want to build the environment? (y/N): " -n 1 -r
-    echo
+    printf "\n"
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         log_info "Building environment..."
         ./scripts/build.sh

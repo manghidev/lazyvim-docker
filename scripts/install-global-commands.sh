@@ -43,6 +43,7 @@ printf "  lazy stop       -> make stop\n"
 printf "  lazy status     -> make status\n"
 printf "  lazy build      -> make build\n"
 printf "  lazy health     -> make health\n"
+printf "  lazy update     -> make update\n"
 printf "  lazy uninstall  -> Complete removal (same as curl method)\n"
 printf "\n"
 
@@ -85,20 +86,23 @@ lazy() {
         printf "Usage: lazy <command>\n"
         printf "\n"
         printf "Available commands:\n"
-        printf "  start     Start the container\n"
-        printf "  enter     Enter the container (starts if stopped)\n"
-        printf "  stop      Stop the container\n"
-        printf "  status    Show container status\n"
-        printf "  health    Run health diagnostics\n"
-        printf "  build     Build/rebuild the container\n"
-        printf "  restart   Restart the container\n"
-        printf "  destroy   Destroy everything\n"
-        printf "  clean     Clean up Docker resources\n"
-        printf "  quick     Quick start (build + enter)\n"
-        printf "  backup    Backup configurations\n"
-        printf "  version   Show version\n"
-        printf "  configure Reconfigure directories and timezone\n"
-        printf "  uninstall Complete removal (same as curl method)\n"
+        printf "  start       Start the container\n"
+        printf "  enter       Enter the container (starts if stopped)\n"
+        printf "  stop        Stop the container\n"
+        printf "  status      Show container status\n"
+        printf "  health      Run health diagnostics\n"
+        printf "  build       Build/rebuild the container\n"
+        printf "  restart     Restart the container\n"
+        printf "  destroy     Destroy everything\n"
+        printf "  clean       Clean up Docker resources\n"
+        printf "  quick       Quick start (build + enter)\n"
+        printf "  backup      Backup configurations\n"
+        printf "  restore     Restore from backup\n"
+        printf "  update      Update to latest version\n"
+        printf "  version     Show version\n"
+        printf "  timezone    Check timezone configuration\n"
+        printf "  configure   Reconfigure directories and timezone\n"
+        printf "  uninstall   Complete removal (same as curl method)\n"
         printf "\n"
         printf "Examples:\n"
         printf "  lazy enter     # Enter LazyVim from anywhere\n"
@@ -110,7 +114,7 @@ lazy() {
     shift
     
     case "\$cmd" in
-        start|enter|stop|status|health|build|restart|destroy|clean|quick|backup|configure|version)
+        start|enter|stop|status|health|build|restart|destroy|clean|quick|backup|restore|update|version|timezone|configure)
             printf "🚀 Running: make %s %s\n" "\$cmd" "\$@"
             (cd "\$lazyvim_docker_path" && make "\$cmd" "\$@")
             ;;
@@ -128,7 +132,7 @@ lazy() {
 
 # Tab completion for lazy command (Zsh)
 _lazy_zsh_completion() {
-    local commands=(start enter stop status health build restart destroy clean quick backup configure version uninstall)
+    local commands=(start enter stop status health build restart destroy clean quick backup restore update version timezone configure uninstall)
     _describe 'lazy commands' commands
 }
 
@@ -172,20 +176,23 @@ lazy() {
         printf "Usage: lazy <command>\n"
         printf "\n"
         printf "Available commands:\n"
-        printf "  start     Start the container\n"
-        printf "  enter     Enter the container (starts if stopped)\n"
-        printf "  stop      Stop the container\n"
-        printf "  status    Show container status\n"
-        printf "  health    Run health diagnostics\n"
-        printf "  build     Build/rebuild the container\n"
-        printf "  restart   Restart the container\n"
-        printf "  destroy   Destroy everything\n"
-        printf "  clean     Clean up Docker resources\n"
-        printf "  quick     Quick start (build + enter)\n"
-        printf "  backup    Backup configurations\n"
-        printf "  version   Show version\n"
-        printf "  configure Reconfigure directories and timezone\n"
-        printf "  uninstall Complete removal (same as curl method)\n"
+        printf "  start       Start the container\n"
+        printf "  enter       Enter the container (starts if stopped)\n"
+        printf "  stop        Stop the container\n"
+        printf "  status      Show container status\n"
+        printf "  health      Run health diagnostics\n"
+        printf "  build       Build/rebuild the container\n"
+        printf "  restart     Restart the container\n"
+        printf "  destroy     Destroy everything\n"
+        printf "  clean       Clean up Docker resources\n"
+        printf "  quick       Quick start (build + enter)\n"
+        printf "  backup      Backup configurations\n"
+        printf "  restore     Restore from backup\n"
+        printf "  update      Update to latest version\n"
+        printf "  version     Show version\n"
+        printf "  timezone    Check timezone configuration\n"
+        printf "  configure   Reconfigure directories and timezone\n"
+        printf "  uninstall   Complete removal (same as curl method)\n"
         printf "\n"
         printf "Examples:\n"
         printf "  lazy enter     # Enter LazyVim from anywhere\n"
@@ -197,7 +204,7 @@ lazy() {
     shift
     
     case "\$cmd" in
-        start|enter|stop|status|health|build|restart|destroy|clean|quick|backup|configure|version)
+        start|enter|stop|status|health|build|restart|destroy|clean|quick|backup|restore|update|version|timezone|configure)
             printf "🚀 Running: make %s %s\n" "\$cmd" "\$@"
             (cd "\$lazyvim_docker_path" && make "\$cmd" "\$@")
             ;;
@@ -216,7 +223,7 @@ lazy() {
 # Tab completion for lazy command (Bash)
 _lazy_completion() {
     local cur="\${COMP_WORDS[COMP_CWORD]}"
-    local commands="start enter stop status health build restart destroy clean quick backup configure version uninstall"
+    local commands="start enter stop status health build restart destroy clean quick backup restore update version timezone configure uninstall"
     COMPREPLY=(\$(compgen -W "\$commands" -- "\$cur"))
 }
 

@@ -230,7 +230,7 @@ main() {
     printf "  3. Configure Neovim and other tools as needed\n"
     printf "\n"
     printf "Useful commands:\n"
-    printf "  - 'make help' - Show all available commands\n"
+    printf "  - 'make' - Show all available commands\n"
     printf "  - 'make status' - Check environment status\n"
     printf "  - './scripts/health-check.sh' - Run health check\n"
 }

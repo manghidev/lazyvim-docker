@@ -1,11 +1,18 @@
 # LazyVim Docker - Makefile
 # Provides easy-to-use commands for managing the LazyVim Docker environment
 
-.PHONY: help build start enter stop destroy clean status update logs backup restore dev quick version bump-version restart
+.PHONY: default build start enter stop destroy clean status update backup restore dev quick version bump-version restart
 .PHONY: install-global uninstall install-remote remote-uninstall remote-update configure
 
 # Default target
-.DEFAULT_GOAL := help
+.DEFAULT_GOAL := default
+
+default: # Show all available commands (default when running 'make')
+	@echo "$(BLUE)LazyVim Docker Environment - Available Commands$(NC)"
+	@echo ""
+	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*##/ { printf "$(GREEN)%-15s$(NC) %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
+	@echo ""
+	@echo "$(YELLOW)Current version: $(VERSION)$(NC)"
 
 # Colors for output
 RED := \033[0;31m
@@ -25,13 +32,6 @@ USER_GID := $(shell if [ "$(shell uname)" = "Linux" ]; then id -g; else echo "10
 
 # Docker compose with environment variables for Linux permission compatibility
 DOCKER_COMPOSE := USER_UID=$(USER_UID) USER_GID=$(USER_GID) docker compose
-
-help: ## Show this help message
-	@echo "$(BLUE)LazyVim Docker Environment - Available Commands$(NC)"
-	@echo ""
-	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*##/ { printf "$(GREEN)%-15s$(NC) %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
-	@echo ""
-	@echo "$(YELLOW)Current version: $(VERSION)$(NC)"
 
 build: ## Build the Docker environment (clean build)
 	@echo "$(BLUE)Building LazyVim Docker environment v$(VERSION)...$(NC)"
@@ -116,10 +116,6 @@ status: ## Show container status
 		echo "$(BLUE)Use 'make start' to start the container$(NC)"; \
 		docker compose ps; \
 	fi
-
-logs: ## Show container logs
-	@echo "$(BLUE)Container Logs:$(NC)"
-	@docker compose logs -f --tail=50
 
 update: ## Update to latest version and rebuild
 	@echo "$(BLUE)Updating LazyVim environment...$(NC)"

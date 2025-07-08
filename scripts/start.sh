@@ -310,7 +310,6 @@ main() {
     printf "  ${GREEN}lazy configure${NC} # Reconfigure directories and timezone\n"
     printf "  ${GREEN}lazy update${NC}    # Update to latest version\n"
     printf "  ${GREEN}lazy uninstall${NC} # Uninstall everything\n"
-    printf "  ${GREEN}lazy help${NC}      # Show all available commands\n"
     printf "\n"
     print_info "To get started:"
     printf "  1. Restart your terminal or run: ${YELLOW}source ~/.zshrc${NC} (or ~/.bashrc)\n"

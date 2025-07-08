@@ -10,7 +10,7 @@ This document provides a comprehensive guide to all available commands in the La
 
 | Command | Description | Example |
 |---------|-------------|---------|
-| `make help` | Show all available commands with descriptions | `make help` |
+| `make` | Show all available commands with descriptions (default target) | `make` |
 | `make version` | Show current project version | `make version` |
 | `make status` | Show container and environment status | `make status` |
 | `make health` | Run comprehensive health diagnostics | `make health` |
@@ -31,7 +31,6 @@ This document provides a comprehensive guide to all available commands in the La
 | Command | Description | Example |
 |---------|-------------|---------|
 | `make dev` | Start in development mode with workspace mounted | `make dev` |
-| `make logs` | Show container logs (follow mode) | `make logs` |
 | `make update` | Update to latest version and rebuild | `make update` |
 
 ### Maintenance
@@ -156,7 +155,6 @@ make update           # Update to latest
 ### Troubleshooting
 ```bash
 ./scripts/health-check.sh    # Diagnose issues
-make logs                    # Check container logs
 make destroy && make build   # Nuclear option - rebuild everything
 ```
 

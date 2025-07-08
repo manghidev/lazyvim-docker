@@ -43,7 +43,6 @@ printf "  lazy stop       -> make stop\n"
 printf "  lazy status     -> make status\n"
 printf "  lazy build      -> make build\n"
 printf "  lazy health     -> make health\n"
-printf "  lazy help       -> make help\n"
 printf "  lazy uninstall  -> Complete removal (same as curl method)\n"
 printf "\n"
 
@@ -81,12 +80,11 @@ lazyvim_docker_path="$LAZYVIM_DOCKER_PATH"
 
 lazy() {
     if [[ \$# -eq 0 ]]; then
-        printf "LazyVim Docker - Global Commands\n"
+        printf "LazyVim Docker - Available Commands\n"
         printf "\n"
         printf "Usage: lazy <command>\n"
         printf "\n"
         printf "Available commands:\n"
-        printf "  help      Show all available commands\n"
         printf "  start     Start the container\n"
         printf "  enter     Enter the container (starts if stopped)\n"
         printf "  stop      Stop the container\n"
@@ -97,7 +95,6 @@ lazy() {
         printf "  destroy   Destroy everything\n"
         printf "  clean     Clean up Docker resources\n"
         printf "  quick     Quick start (build + enter)\n"
-        printf "  logs      Show container logs\n"
         printf "  backup    Backup configurations\n"
         printf "  version   Show version\n"
         printf "  configure Reconfigure directories and timezone\n"
@@ -113,7 +110,7 @@ lazy() {
     shift
     
     case "\$cmd" in
-        help|start|enter|stop|status|health|build|restart|destroy|clean|quick|logs|backup|configure|version)
+        start|enter|stop|status|health|build|restart|destroy|clean|quick|backup|configure|version)
             printf "🚀 Running: make %s %s\n" "\$cmd" "\$@"
             (cd "\$lazyvim_docker_path" && make "\$cmd" "\$@")
             ;;
@@ -131,7 +128,7 @@ lazy() {
 
 # Tab completion for lazy command (Zsh)
 _lazy_zsh_completion() {
-    local commands=(help start enter stop status health build restart destroy clean quick logs backup configure version uninstall)
+    local commands=(start enter stop status health build restart destroy clean quick backup configure version uninstall)
     _describe 'lazy commands' commands
 }
 
@@ -170,12 +167,11 @@ lazyvim_docker_path="$LAZYVIM_DOCKER_PATH"
 
 lazy() {
     if [[ \$# -eq 0 ]]; then
-        printf "LazyVim Docker - Global Commands\n"
+        printf "LazyVim Docker - Available Commands\n"
         printf "\n"
         printf "Usage: lazy <command>\n"
         printf "\n"
         printf "Available commands:\n"
-        printf "  help      Show all available commands\n"
         printf "  start     Start the container\n"
         printf "  enter     Enter the container (starts if stopped)\n"
         printf "  stop      Stop the container\n"
@@ -186,7 +182,6 @@ lazy() {
         printf "  destroy   Destroy everything\n"
         printf "  clean     Clean up Docker resources\n"
         printf "  quick     Quick start (build + enter)\n"
-        printf "  logs      Show container logs\n"
         printf "  backup    Backup configurations\n"
         printf "  version   Show version\n"
         printf "  configure Reconfigure directories and timezone\n"
@@ -202,7 +197,7 @@ lazy() {
     shift
     
     case "\$cmd" in
-        help|start|enter|stop|status|health|build|restart|destroy|clean|quick|logs|backup|configure|version)
+        start|enter|stop|status|health|build|restart|destroy|clean|quick|backup|configure|version)
             printf "🚀 Running: make %s %s\n" "\$cmd" "\$@"
             (cd "\$lazyvim_docker_path" && make "\$cmd" "\$@")
             ;;
@@ -221,7 +216,7 @@ lazy() {
 # Tab completion for lazy command (Bash)
 _lazy_completion() {
     local cur="\${COMP_WORDS[COMP_CWORD]}"
-    local commands="help start enter stop status health build restart destroy clean quick logs backup configure version uninstall"
+    local commands="start enter stop status health build restart destroy clean quick backup configure version uninstall"
     COMPREPLY=(\$(compgen -W "\$commands" -- "\$cur"))
 }
 
@@ -252,7 +247,6 @@ install_global_commands() {
     printf "\n"
     log_info "Usage:"
     printf "  lazy enter     # Enter LazyVim development environment\n"
-    printf "  lazy help      # Show all available commands\n"
     printf "\n"
     log_info "To activate:"
     printf "  • Restart your terminal, or\n"

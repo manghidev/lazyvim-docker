@@ -201,7 +201,7 @@ get_current_mounts() {
     export CURRENT_MOUNTS_DATA="${mounts_data[*]}"
     
     # Return 0 always to avoid script termination
-    echo "$((counter - 1))" > /tmp/mount_count
+    printf "%d\n" "$((counter - 1))" > /tmp/mount_count
     return 0
 }
 
@@ -322,15 +322,15 @@ configure_timezone() {
     # Detect system timezone
     local system_tz=""
     if command -v timedatectl >/dev/null 2>&1; then
-        system_tz=$(timedatectl show --property=Timezone --value 2>/dev/null || echo "")
+        system_tz=$(timedatectl show --property=Timezone --value 2>/dev/null || printf "")
     elif [[ -f /etc/timezone ]]; then
-        system_tz=$(cat /etc/timezone 2>/dev/null || echo "")
+        system_tz=$(cat /etc/timezone 2>/dev/null || printf "")
     elif [[ "$OSTYPE" == "darwin"* ]]; then
-        system_tz=$(ls -la /etc/localtime 2>/dev/null | sed 's/.*zoneinfo\///' || echo "")
+        system_tz=$(ls -la /etc/localtime 2>/dev/null | sed 's/.*zoneinfo\///' || printf "")
     fi
     
     # Get current timezone from docker-compose.yml
-    local current_tz=$(grep "TIMEZONE:" docker-compose.yml | awk '{print $2}' 2>/dev/null || echo "")
+    local current_tz=$(grep "TIMEZONE:" docker-compose.yml | awk '{print $2}' 2>/dev/null || printf "")
     local default_tz="${system_tz:-America/Mexico_City}"
     
     printf "🌍 Timezone Configuration:\n"
@@ -564,7 +564,7 @@ configure_additional_directories() {
                 
                 # Get and show numbered list
                 get_current_mounts "true"
-                local mount_count=$(cat /tmp/mount_count 2>/dev/null || echo "0")
+                local mount_count=$(cat /tmp/mount_count 2>/dev/null || printf "0")
                 
                 if [[ "$mount_count" -eq 0 ]]; then
                     printf "\n"

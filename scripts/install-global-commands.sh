@@ -35,17 +35,16 @@ LAZYVIM_DOCKER_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LAZYVIM_DOCKER_PATH="$(dirname "$LAZYVIM_DOCKER_PATH")"
 
 log_info "LazyVim Docker Global Commands Installer"
-echo ""
+printf "\n"
 log_info "This will install global 'lazy' commands that you can use from anywhere:"
-echo "  lazy start      -> make start"
-echo "  lazy enter      -> make enter"
-echo "  lazy stop       -> make stop"
-echo "  lazy status     -> make status"
-echo "  lazy build      -> make build"
-echo "  lazy health     -> make health"
-echo "  lazy help       -> make help"
-echo "  lazy uninstall  -> Complete removal (same as curl method)"
-echo ""
+printf "  lazy start      -> make start\n"
+printf "  lazy enter      -> make enter\n"
+printf "  lazy stop       -> make stop\n"
+printf "  lazy status     -> make status\n"
+printf "  lazy build      -> make build\n"
+printf "  lazy health     -> make health\n"
+printf "  lazy uninstall  -> Complete removal (same as curl method)\n"
+printf "\n"
 
 # Check if we're in the correct directory
 if [[ ! -f "$LAZYVIM_DOCKER_PATH/Makefile" ]] || [[ ! -f "$LAZYVIM_DOCKER_PATH/docker-compose.yml" ]]; then
@@ -81,31 +80,29 @@ lazyvim_docker_path="$LAZYVIM_DOCKER_PATH"
 
 lazy() {
     if [[ \$# -eq 0 ]]; then
-        echo "LazyVim Docker - Global Commands"
-        echo ""
-        echo "Usage: lazy <command>"
-        echo ""
-        echo "Available commands:"
-        echo "  help      Show all available commands"
-        echo "  start     Start the container"
-        echo "  enter     Enter the container (starts if stopped)"
-        echo "  stop      Stop the container"
-        echo "  status    Show container status"
-        echo "  health    Run health diagnostics"
-        echo "  build     Build/rebuild the container"
-        echo "  restart   Restart the container"
-        echo "  destroy   Destroy everything"
-        echo "  clean     Clean up Docker resources"
-        echo "  quick     Quick start (build + enter)"
-        echo "  logs      Show container logs"
-        echo "  backup    Backup configurations"
-        echo "  version   Show version"
-        echo "  configure Reconfigure directories and timezone"
-        echo "  uninstall Complete removal (same as curl method)"
-        echo ""
-        echo "Examples:"
-        echo "  lazy enter     # Enter LazyVim from anywhere"
-        echo "  lazy build     # Build the environment"
+        printf "LazyVim Docker - Available Commands\n"
+        printf "\n"
+        printf "Usage: lazy <command>\n"
+        printf "\n"
+        printf "Available commands:\n"
+        printf "  start     Start the container\n"
+        printf "  enter     Enter the container (starts if stopped)\n"
+        printf "  stop      Stop the container\n"
+        printf "  status    Show container status\n"
+        printf "  health    Run health diagnostics\n"
+        printf "  build     Build/rebuild the container\n"
+        printf "  restart   Restart the container\n"
+        printf "  destroy   Destroy everything\n"
+        printf "  clean     Clean up Docker resources\n"
+        printf "  quick     Quick start (build + enter)\n"
+        printf "  backup    Backup configurations\n"
+        printf "  version   Show version\n"
+        printf "  configure Reconfigure directories and timezone\n"
+        printf "  uninstall Complete removal (same as curl method)\n"
+        printf "\n"
+        printf "Examples:\n"
+        printf "  lazy enter     # Enter LazyVim from anywhere\n"
+        printf "  lazy build     # Build the environment\n"
         return 0
     fi
     
@@ -113,17 +110,17 @@ lazy() {
     shift
     
     case "\$cmd" in
-        help|start|enter|stop|status|health|build|restart|destroy|clean|quick|logs|backup|configure|version)
-            echo "🚀 Running: make \$cmd \$@"
+        start|enter|stop|status|health|build|restart|destroy|clean|quick|backup|configure|version)
+            printf "🚀 Running: make %s %s\n" "\$cmd" "\$@"
             (cd "\$lazyvim_docker_path" && make "\$cmd" "\$@")
             ;;
         uninstall)
-            echo "🗑️  Running complete uninstaller..."
+            printf "🗑️  Running complete uninstaller...\n"
             (cd "\$lazyvim_docker_path" && ./scripts/remote-uninstall.sh)
             ;;
         *)
-            echo "❌ Unknown command: \$cmd"
-            echo "💡 Use 'lazy' to see available commands"
+            printf "❌ Unknown command: %s\n" "\$cmd"
+            printf "💡 Use 'lazy' to see available commands\n"
             return 1
             ;;
     esac
@@ -131,7 +128,7 @@ lazy() {
 
 # Tab completion for lazy command (Zsh)
 _lazy_zsh_completion() {
-    local commands=(help start enter stop status health build restart destroy clean quick logs backup configure version uninstall)
+    local commands=(start enter stop status health build restart destroy clean quick backup configure version uninstall)
     _describe 'lazy commands' commands
 }
 
@@ -170,31 +167,29 @@ lazyvim_docker_path="$LAZYVIM_DOCKER_PATH"
 
 lazy() {
     if [[ \$# -eq 0 ]]; then
-        echo "LazyVim Docker - Global Commands"
-        echo ""
-        echo "Usage: lazy <command>"
-        echo ""
-        echo "Available commands:"
-        echo "  help      Show all available commands"
-        echo "  start     Start the container"
-        echo "  enter     Enter the container (starts if stopped)"
-        echo "  stop      Stop the container"
-        echo "  status    Show container status"
-        echo "  health    Run health diagnostics"
-        echo "  build     Build/rebuild the container"
-        echo "  restart   Restart the container"
-        echo "  destroy   Destroy everything"
-        echo "  clean     Clean up Docker resources"
-        echo "  quick     Quick start (build + enter)"
-        echo "  logs      Show container logs"
-        echo "  backup    Backup configurations"
-        echo "  version   Show version"
-        echo "  configure Reconfigure directories and timezone"
-        echo "  uninstall Complete removal (same as curl method)"
-        echo ""
-        echo "Examples:"
-        echo "  lazy enter     # Enter LazyVim from anywhere"
-        echo "  lazy build     # Build the environment"
+        printf "LazyVim Docker - Available Commands\n"
+        printf "\n"
+        printf "Usage: lazy <command>\n"
+        printf "\n"
+        printf "Available commands:\n"
+        printf "  start     Start the container\n"
+        printf "  enter     Enter the container (starts if stopped)\n"
+        printf "  stop      Stop the container\n"
+        printf "  status    Show container status\n"
+        printf "  health    Run health diagnostics\n"
+        printf "  build     Build/rebuild the container\n"
+        printf "  restart   Restart the container\n"
+        printf "  destroy   Destroy everything\n"
+        printf "  clean     Clean up Docker resources\n"
+        printf "  quick     Quick start (build + enter)\n"
+        printf "  backup    Backup configurations\n"
+        printf "  version   Show version\n"
+        printf "  configure Reconfigure directories and timezone\n"
+        printf "  uninstall Complete removal (same as curl method)\n"
+        printf "\n"
+        printf "Examples:\n"
+        printf "  lazy enter     # Enter LazyVim from anywhere\n"
+        printf "  lazy build     # Build the environment\n"
         return 0
     fi
     
@@ -202,17 +197,17 @@ lazy() {
     shift
     
     case "\$cmd" in
-        help|start|enter|stop|status|health|build|restart|destroy|clean|quick|logs|backup|configure|version)
-            echo "🚀 Running: make \$cmd \$@"
+        start|enter|stop|status|health|build|restart|destroy|clean|quick|backup|configure|version)
+            printf "🚀 Running: make %s %s\n" "\$cmd" "\$@"
             (cd "\$lazyvim_docker_path" && make "\$cmd" "\$@")
             ;;
         uninstall)
-            echo "🗑️  Running complete uninstaller..."
+            printf "🗑️  Running complete uninstaller...\n"
             (cd "\$lazyvim_docker_path" && ./scripts/remote-uninstall.sh)
             ;;
         *)
-            echo "❌ Unknown command: \$cmd"
-            echo "💡 Use 'lazy' to see available commands"
+            printf "❌ Unknown command: %s\n" "\$cmd"
+            printf "💡 Use 'lazy' to see available commands\n"
             return 1
             ;;
     esac
@@ -221,7 +216,7 @@ lazy() {
 # Tab completion for lazy command (Bash)
 _lazy_completion() {
     local cur="\${COMP_WORDS[COMP_CWORD]}"
-    local commands="help start enter stop status health build restart destroy clean quick logs backup configure version uninstall"
+    local commands="start enter stop status health build restart destroy clean quick backup configure version uninstall"
     COMPREPLY=(\$(compgen -W "\$commands" -- "\$cur"))
 }
 
@@ -243,22 +238,21 @@ install_global_commands() {
     install_bash
     install_zsh
     
-    echo ""
+    printf "\n"
     log_success "✓ Global 'lazy' commands installed!"
-    echo ""
+    printf "\n"
     log_info "Commands installed for both Bash and Zsh:"
-    echo "  • Bash: $HOME/.bashrc"
-    echo "  • Zsh: $HOME/.zshrc"
-    echo ""
+    printf "  • Bash: %s/.bashrc\n" "$HOME"
+    printf "  • Zsh: %s/.zshrc\n" "$HOME"
+    printf "\n"
     log_info "Usage:"
-    echo "  lazy enter     # Enter LazyVim development environment"
-    echo "  lazy help      # Show all available commands"
-    echo ""
+    printf "  lazy enter     # Enter LazyVim development environment\n"
+    printf "\n"
     log_info "To activate:"
-    echo "  • Restart your terminal, or"
-    echo "  • Run: source ~/.bashrc   (for Bash)"
-    echo "  • Run: source ~/.zshrc    (for Zsh)"
-    echo ""
+    printf "  • Restart your terminal, or\n"
+    printf "  • Run: source ~/.bashrc   (for Bash)\n"
+    printf "  • Run: source ~/.zshrc    (for Zsh)\n"
+    printf "\n"
     
     # Detect current shell and provide specific activation command
     local current_shell=""
@@ -276,7 +270,7 @@ install_global_commands() {
         printf "${GREEN}For your current Bash session, run: source ~/.bashrc${NC}\n"
     fi
     
-    echo ""
+    printf "\n"
 }
 
 # Run the installation

@@ -14,25 +14,25 @@ NC='\033[0m'
 
 # Functions
 log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
+    printf "${BLUE}[INFO]${NC} %s\n" "$1"
 }
 
 log_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
+    printf "${GREEN}[SUCCESS]${NC} %s\n" "$1"
 }
 
 log_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
+    printf "${YELLOW}[WARNING]${NC} %s\n" "$1"
 }
 
 log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+    printf "${RED}[ERROR]${NC} %s\n" "$1"
 }
 
 print_header() {
-    echo -e "${BLUE}=== LazyVim Docker Setup ===${NC}"
-    echo "This script will help you set up your LazyVim Docker environment"
-    echo ""
+    printf "${BLUE}=== LazyVim Docker Setup ===${NC}\n"
+    printf "This script will help you set up your LazyVim Docker environment\n"
+    printf "\n"
 }
 
 # Create dotfiles structure
@@ -85,8 +85,8 @@ EOF
 # Configure git settings
 configure_git() {
     log_info "Git configuration setup"
-    echo "Let's configure git for your container environment"
-    echo ""
+    printf "Let's configure git for your container environment\n"
+    printf "\n"
     
     read -p "Enter your git username: " GIT_USER
     read -p "Enter your git email: " GIT_EMAIL
@@ -123,8 +123,8 @@ EOF
 # Configure volumes in docker-compose.yml
 configure_volumes() {
     log_info "Volume configuration"
-    echo "Let's configure the directories you want to mount in your container"
-    echo ""
+    printf "Let's configure the directories you want to mount in your container\n"
+    printf "\n"
     
     # Detect OS
     if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -137,15 +137,15 @@ configure_volumes() {
         DEFAULT_PROJECTS="$HOME/Projects"
     fi
     
-    echo "Detected OS: $OS"
-    echo ""
+    printf "Detected OS: %s\n" "$OS"
+    printf "\n"
     
-    echo "Current default mounts:"
-    echo "  - Documents: $DEFAULT_DOCS"
-    echo ""
+    printf "Current default mounts:\n"
+    printf "  - Documents: %s\n" "$DEFAULT_DOCS"
+    printf "\n"
     
     read -p "Do you want to add a Projects directory? (y/N): " -n 1 -r
-    echo
+    printf "\n"
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         read -p "Enter the path to your projects directory [$DEFAULT_PROJECTS]: " PROJECTS_DIR
         PROJECTS_DIR=${PROJECTS_DIR:-$DEFAULT_PROJECTS}
@@ -161,7 +161,7 @@ configure_volumes() {
     fi
     
     read -p "Do you want to add any other custom directories? (y/N): " -n 1 -r
-    echo
+    printf "\n"
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         while true; do
             read -p "Enter local directory path (or 'done' to finish): " CUSTOM_DIR
@@ -197,42 +197,42 @@ main() {
     
     # Create dotfiles structure
     create_dotfiles_structure
-    echo ""
+    printf "\n"
     
     # Configure git
     read -p "Do you want to configure git settings? (y/N): " -n 1 -r
-    echo
+    printf "\n"
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         configure_git
-        echo ""
+        printf "\n"
     fi
     
     # Configure volumes
     read -p "Do you want to configure volume mounts? (y/N): " -n 1 -r
-    echo
+    printf "\n"
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         configure_volumes
-        echo ""
+        printf "\n"
     fi
     
     # Make scripts executable
     log_info "Making scripts executable..."
     chmod +x *.sh scripts/*.sh
     log_success "Scripts are now executable"
-    echo ""
+    printf "\n"
     
     # Final message
     log_success "Setup completed!"
-    echo ""
-    echo "Next steps:"
-    echo "  1. Run 'make build' to build the environment"
-    echo "  2. Run 'make enter' to start and enter the container"
-    echo "  3. Configure Neovim and other tools as needed"
-    echo ""
-    echo "Useful commands:"
-    echo "  - 'make help' - Show all available commands"
-    echo "  - 'make status' - Check environment status"
-    echo "  - './scripts/health-check.sh' - Run health check"
+    printf "\n"
+    printf "Next steps:\n"
+    printf "  1. Run 'make build' to build the environment\n"
+    printf "  2. Run 'make enter' to start and enter the container\n"
+    printf "  3. Configure Neovim and other tools as needed\n"
+    printf "\n"
+    printf "Useful commands:\n"
+    printf "  - 'make' - Show all available commands\n"
+    printf "  - 'make status' - Check environment status\n"
+    printf "  - './scripts/health-check.sh' - Run health check\n"
 }
 
 # Run main function

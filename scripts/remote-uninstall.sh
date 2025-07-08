@@ -7,13 +7,13 @@ set -e
 
 # Colors for output using tput (more compatible)
 if command -v tput >/dev/null 2>&1 && [[ -t 1 ]]; then
-    RED=$(tput setaf 1 2>/dev/null || echo '')
-    GREEN=$(tput setaf 2 2>/dev/null || echo '')
-    YELLOW=$(tput setaf 3 2>/dev/null || echo '')
-    BLUE=$(tput setaf 4 2>/dev/null || echo '')
-    PURPLE=$(tput setaf 5 2>/dev/null || echo '')
-    CYAN=$(tput setaf 6 2>/dev/null || echo '')
-    NC=$(tput sgr0 2>/dev/null || echo '')
+    RED=$(tput setaf 1 2>/dev/null || printf '')
+    GREEN=$(tput setaf 2 2>/dev/null || printf '')
+    YELLOW=$(tput setaf 3 2>/dev/null || printf '')
+    BLUE=$(tput setaf 4 2>/dev/null || printf '')
+    PURPLE=$(tput setaf 5 2>/dev/null || printf '')
+    CYAN=$(tput setaf 6 2>/dev/null || printf '')
+    NC=$(tput sgr0 2>/dev/null || printf '')
 else
     RED=''
     GREEN=''
@@ -78,21 +78,21 @@ restart_terminal() {
     local helper_script="/tmp/lazyvim_cleanup_terminal.sh"
     cat > "$helper_script" << 'EOF'
 #!/bin/bash
-echo "🧹 Restarting terminal to complete LazyVim Docker cleanup..."
-echo ""
+printf "🧹 Restarting terminal to complete LazyVim Docker cleanup...\n"
+printf "\n"
 EOF
-    echo "exec $current_shell" >> "$helper_script"
+    printf "exec %s\n" "$current_shell" >> "$helper_script"
     chmod +x "$helper_script"
     
-    echo ""
+    printf "\n"
     print_warning "🧹 To complete cleanup and remove any traces:"
-    echo ""
+    printf "\n"
     printf "  ${GREEN}Option 1 (Easiest):${NC}\n"
     printf "    ${GREEN}%s${NC}\n" "$helper_script"
-    echo ""
+    printf "\n"
     printf "  ${GREEN}Option 2 (Manual):${NC}\n"
     printf "    ${GREEN}exec %s${NC}\n" "$current_shell"
-    echo ""
+    printf "\n"
     print_info "💡 Copy and paste the first command to clean your terminal"
     print_info "This ensures no traces of 'lazy' commands remain"
 }
@@ -227,13 +227,13 @@ remove_path_modifications() {
 # Confirm uninstallation
 # Confirm uninstallation
 confirm_uninstall() {
-    echo ""
+    printf "\n"
     print_warning "This will completely remove LazyVim Docker from your system:"
-    echo "  • Docker containers and images"
-    echo "  • Installation directory ($INSTALL_DIR)"
-    echo "  • Global 'lazy' command"
-    echo "  • All data and configurations"
-    echo ""
+    printf "  • Docker containers and images\n"
+    printf "  • Installation directory (%s)\n" "$INSTALL_DIR"
+    printf "  • Global 'lazy' command\n"
+    printf "  • All data and configurations\n"
+    printf "\n"
     
     # Try to read from terminal, fallback to stdin if needed
     printf "Are you sure you want to continue? [y/N]: "
@@ -278,7 +278,7 @@ main() {
     print_header
     
     print_info "LazyVim Docker Uninstaller"
-    echo ""
+    printf "\n"
     
     confirm_uninstall
     
@@ -288,19 +288,19 @@ main() {
     remove_shell_commands
     remove_path_modifications
     
-    echo ""
+    printf "\n"
     print_success "🗑️  LazyVim Docker has been completely uninstalled!"
-    echo ""
+    printf "\n"
     print_info "What was removed:"
     print_info "  ✓ Docker containers and images"
     print_info "  ✓ Installation directory"
     print_info "  ✓ Global commands"
-    echo ""
+    printf "\n"
     print_info "Thank you for using LazyVim Docker! 🚀"
-    echo ""
+    printf "\n"
     print_info "To reinstall later, run:"
     printf "  ${GREEN}curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/start.sh | bash${NC}\n"
-    echo ""
+    printf "\n"
     
     # Restart terminal to clean up environment
     restart_terminal

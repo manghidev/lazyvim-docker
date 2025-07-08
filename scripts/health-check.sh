@@ -108,7 +108,7 @@ health_check() {
     VOLUMES=$(docker volume ls | grep lazyvim || true)
     if [[ -n "$VOLUMES" ]]; then
         log_success "LazyVim volumes found:"
-        echo "$VOLUMES" | sed 's/^/  /'
+        printf "%s\n" "$VOLUMES" | sed 's/^/  /'
     else
         log_warning "No LazyVim volumes found"
     fi

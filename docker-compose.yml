@@ -6,6 +6,8 @@ services:
       args:
         VERSION: ${VERSION:-1.0.0}
         TIMEZONE: America/Mexico_City
+        USER_UID: ${USER_UID:-1000}
+        USER_GID: ${USER_GID:-1000}
     container_name: lazyvim
     hostname: lazyvim-dev
     restart: unless-stopped

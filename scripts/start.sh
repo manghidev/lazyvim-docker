@@ -25,31 +25,31 @@ BRANCH="${LAZYVIM_BRANCH:-main}"
 
 # Print functions
 print_header() {
-    echo -e "${CYAN}╔══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║             LazyVim Docker - Simple Installer               ║${NC}"
-    echo -e "${CYAN}║                 Smart Defaults, Zero Input                  ║${NC}"
-    echo -e "${CYAN}╚══════════════════════════════════════════════════════════════╝${NC}"
-    echo ""
+    printf "${CYAN}╔══════════════════════════════════════════════════════════════╗${NC}\n"
+    printf "${CYAN}║             LazyVim Docker - Simple Installer               ║${NC}\n"
+    printf "${CYAN}║                 Smart Defaults, Zero Input                  ║${NC}\n"
+    printf "${CYAN}╚══════════════════════════════════════════════════════════════╝${NC}\n"
+    printf "\n"
 }
 
 print_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
+    printf "${BLUE}[INFO]${NC} %s\n" "$1"
 }
 
 print_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
+    printf "${GREEN}[SUCCESS]${NC} %s\n" "$1"
 }
 
 print_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
+    printf "${YELLOW}[WARNING]${NC} %s\n" "$1"
 }
 
 print_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+    printf "${RED}[ERROR]${NC} %s\n" "$1"
 }
 
 print_step() {
-    echo -e "${PURPLE}[STEP]${NC} $1"
+    printf "${PURPLE}[STEP]${NC} %s\n" "$1"
 }
 
 # Check if command exists
@@ -84,19 +84,19 @@ check_requirements() {
     
     if [ ${#missing_deps[@]} -ne 0 ]; then
         print_error "Missing required dependencies: ${missing_deps[*]}"
-        echo ""
+        printf "\n"
         print_info "Please install the missing dependencies and try again:"
-        echo ""
+        printf "\n"
         if [[ "$OSTYPE" == "darwin"* ]]; then
-            echo "  brew install ${missing_deps[*]}"
+            printf "  brew install %s\n" "${missing_deps[*]}"
         elif [[ "$OSTYPE" == "linux"* ]]; then
-            echo "  # Ubuntu/Debian:"
-            echo "  sudo apt-get update && sudo apt-get install -y ${missing_deps[*]}"
-            echo ""
-            echo "  # CentOS/RHEL:"
-            echo "  sudo yum install -y ${missing_deps[*]}"
+            printf "  # Ubuntu/Debian:\n"
+            printf "  sudo apt-get update && sudo apt-get install -y %s\n" "${missing_deps[*]}"
+            printf "\n"
+            printf "  # CentOS/RHEL:\n"
+            printf "  sudo yum install -y %s\n" "${missing_deps[*]}"
         fi
-        echo ""
+        printf "\n"
         exit 1
     fi
     
@@ -153,9 +153,9 @@ setup_local_bin_path() {
     
     # Add to PATH if not already there
     if ! grep -q "$HOME/.local/bin" "$shell_config" 2>/dev/null; then
-        echo "" >> "$shell_config"
-        echo "# LazyVim Docker - Add local bin to PATH" >> "$shell_config"
-        echo "$path_line" >> "$shell_config"
+        printf "\n" >> "$shell_config"
+        printf "# LazyVim Docker - Add local bin to PATH\n" >> "$shell_config"
+        printf "%s\n" "$path_line" >> "$shell_config"
         print_info "Added $HOME/.local/bin to PATH in $shell_config"
     fi
 }
@@ -283,7 +283,7 @@ main() {
     print_info "Installation directory: $INSTALL_DIR"
     print_info "Binary directory: $BIN_DIR"
     print_info "Using smart defaults (no interactive input required)"
-    echo ""
+    printf "\n"
     
     check_requirements
     create_directories
@@ -294,31 +294,30 @@ main() {
     build_environment
     cleanup
     
-    echo ""
+    printf "\n"
     print_success "🎉 LazyVim Docker installed successfully!"
-    echo ""
+    printf "\n"
     print_info "Configuration applied:"
-    echo "  • Timezone: Auto-detected from system"
-    echo "  • Documents: Auto-mounted if exists"
-    echo "  • Projects: Auto-mounted if exists"
-    echo ""
+    printf "  • Timezone: Auto-detected from system\n"
+    printf "  • Documents: Auto-mounted if exists\n"
+    printf "  • Projects: Auto-mounted if exists\n"
+    printf "\n"
     print_info "Usage:"
-    echo "  ${GREEN}lazy enter${NC}     # Enter LazyVim development environment"
-    echo "  ${GREEN}lazy start${NC}     # Start the container"
-    echo "  ${GREEN}lazy stop${NC}      # Stop the container"
-    echo "  ${GREEN}lazy status${NC}    # Check container status"
-    echo "  ${GREEN}lazy configure${NC} # Reconfigure directories and timezone"
-    echo "  ${GREEN}lazy update${NC}    # Update to latest version"
-    echo "  ${GREEN}lazy uninstall${NC} # Uninstall everything"
-    echo "  ${GREEN}lazy help${NC}      # Show all available commands"
-    echo ""
+    printf "  ${GREEN}lazy enter${NC}     # Enter LazyVim development environment\n"
+    printf "  ${GREEN}lazy start${NC}     # Start the container\n"
+    printf "  ${GREEN}lazy stop${NC}      # Stop the container\n"
+    printf "  ${GREEN}lazy status${NC}    # Check container status\n"
+    printf "  ${GREEN}lazy configure${NC} # Reconfigure directories and timezone\n"
+    printf "  ${GREEN}lazy update${NC}    # Update to latest version\n"
+    printf "  ${GREEN}lazy uninstall${NC} # Uninstall everything\n"
+    printf "\n"
     print_info "To get started:"
-    echo "  1. Restart your terminal or run: ${YELLOW}source ~/.zshrc${NC} (or ~/.bashrc)"
-    echo "  2. Run: ${GREEN}lazy enter${NC}"
-    echo ""
+    printf "  1. Restart your terminal or run: ${YELLOW}source ~/.zshrc${NC} (or ~/.bashrc)\n"
+    printf "  2. Run: ${GREEN}lazy enter${NC}\n"
+    printf "\n"
     print_info "To customize configuration later:"
-    echo "  Run: ${GREEN}lazy configure${NC}"
-    echo ""
+    printf "  Run: ${GREEN}lazy configure${NC}\n"
+    printf "\n"
     print_info "Happy coding! 🚀"
 }
 

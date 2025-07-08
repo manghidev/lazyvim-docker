@@ -73,19 +73,18 @@ lazy status     # Check container status
 lazy build      # Build/rebuild environment
 lazy update     # Update to latest version
 lazy uninstall  # Complete removal
-lazy help       # Show all available commands
 ```
 
 ### 📁 Local Commands (Traditional Installation)
 From the project directory:
 ```bash
-make help          # Show all available commands
-make enter         # 🔥 DAILY USE: Enter container (starts automatically if stopped)
-make start         # Start existing container (preserves all data)
-make stop          # Stop container (saves all data and plugins)
-make status        # Check container status
-make build         # ⚠️  ONLY for first time or major updates
-make destroy       # ⚠️  DANGEROUS: Removes everything
+make              # Show all available commands (default target)
+make enter        # 🔥 DAILY USE: Enter container (starts automatically if stopped)
+make start        # Start existing container (preserves all data)
+make stop         # Stop container (saves all data and plugins)
+make status       # Check container status
+make build        # ⚠️  ONLY for first time or major updates
+make destroy      # ⚠️  DANGEROUS: Removes everything
 ```
 
 > 💡 **For daily development**: Use `lazy enter` (remote) or `make enter` (traditional)
@@ -371,7 +370,7 @@ volumes:
 ### Health Check Commands
 ```bash
 lazy status     # Container status
-lazy help       # Available commands  
+lazy            # Available commands  
 make health        # Comprehensive diagnostics (traditional)
 ```
 

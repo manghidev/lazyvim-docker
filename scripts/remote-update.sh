@@ -22,30 +22,30 @@ BACKUP_DIR="$HOME/.local/share/lazyvim-docker-backup-$(date +%Y%m%d-%H%M%S)"
 
 # Print functions
 print_header() {
-    echo -e "${CYAN}╔══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║             LazyVim Docker - Updater                        ║${NC}"
-    echo -e "${CYAN}╚══════════════════════════════════════════════════════════════╝${NC}"
-    echo ""
+    printf "${CYAN}╔══════════════════════════════════════════════════════════════╗${NC}\n"
+    printf "${CYAN}║             LazyVim Docker - Updater                        ║${NC}\n"
+    printf "${CYAN}╚══════════════════════════════════════════════════════════════╝${NC}\n"
+    printf "\n"
 }
 
 print_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
+    printf "${BLUE}[INFO]${NC} %s\n" "$1"
 }
 
 print_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
+    printf "${GREEN}[SUCCESS]${NC} %s\n" "$1"
 }
 
 print_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
+    printf "${YELLOW}[WARNING]${NC} %s\n" "$1"
 }
 
 print_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+    printf "${RED}[ERROR]${NC} %s\n" "$1"
 }
 
 print_step() {
-    echo -e "${PURPLE}[STEP]${NC} $1"
+    printf "${PURPLE}[STEP]${NC} %s\n" "$1"
 }
 
 # Check if installation exists
@@ -53,7 +53,7 @@ check_installation() {
     if [ ! -d "$INSTALL_DIR" ]; then
         print_error "LazyVim Docker installation not found at: $INSTALL_DIR"
         print_info "Please install first:"
-        echo "  curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/start.sh | bash"
+        printf "  curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/start.sh | bash\n"
         exit 1
     fi
 }
@@ -148,8 +148,8 @@ update_installation() {
 
 # Rebuild if needed
 rebuild_containers() {
-    echo ""
-    echo -n "Do you want to rebuild Docker containers with the latest changes? [Y/n]: "
+    printf "\n"
+    printf "Do you want to rebuild Docker containers with the latest changes? [Y/n]: "
     read -r response
     
     case "$response" in
@@ -186,12 +186,12 @@ main() {
     
     print_info "Current version: $current_version"
     print_info "Latest version: $latest_version"
-    echo ""
+    printf "\n"
     
     if [ "$current_version" = "$latest_version" ] && [ "$current_version" != "unknown" ]; then
         print_success "You already have the latest version!"
-        echo ""
-        echo -n "Do you want to force update anyway? [y/N]: "
+        printf "\n"
+        printf "Do you want to force update anyway? [y/N]: "
         read -r response
         case "$response" in
             [yY][eE][sS]|[yY])
@@ -210,15 +210,15 @@ main() {
     rebuild_containers
     cleanup
     
-    echo ""
+    printf "\n"
     print_success "🎉 LazyVim Docker updated successfully!"
-    echo ""
+    printf "\n"
     print_info "Updated to version: $(get_current_version)"
     print_info "Backup available at: $BACKUP_DIR"
-    echo ""
+    printf "\n"
     print_info "To start using the updated version:"
     printf "  ${GREEN}lazyvim enter${NC}\n"
-    echo ""
+    printf "\n"
 }
 
 # Run main function

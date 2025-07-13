@@ -126,7 +126,7 @@ lazy() {
             printf "🗑️  Running complete uninstaller...\n"
             local current_dir=\$(pwd)
             cd "\$lazyvim_docker_path"
-            ./scripts/remote-uninstall.sh
+            ./scripts/uninstall.sh
             cd "\$current_dir"
             ;;
         *)
@@ -223,7 +223,7 @@ lazy() {
             printf "🗑️  Running complete uninstaller...\n"
             local current_dir=\$(pwd)
             cd "\$lazyvim_docker_path"
-            ./scripts/remote-uninstall.sh
+            ./scripts/uninstall.sh
             cd "\$current_dir"
             ;;
         *)

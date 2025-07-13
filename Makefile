@@ -118,9 +118,7 @@ status: ## Show container status
 	fi
 
 update: ## Update to latest version and rebuild
-	@echo "$(BLUE)Updating LazyVim environment...$(NC)"
-	@git pull origin main || echo "$(YELLOW)Could not pull latest changes$(NC)"
-	@make build
+	@./scripts/smart-update.sh
 
 backup: ## Backup dotfiles and configuration
 	@echo "$(BLUE)Creating backup of configuration...$(NC)"

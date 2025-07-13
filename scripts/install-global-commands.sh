@@ -116,11 +116,18 @@ lazy() {
     case "\$cmd" in
         start|enter|stop|status|health|build|restart|destroy|clean|quick|backup|restore|update|version|timezone|configure)
             printf "🚀 Running: make %s %s\n" "\$cmd" "\$@"
-            (cd "\$lazyvim_docker_path" && make "\$cmd" "\$@")
+            # Preserve TTY for interactive commands by not using subshell  
+            local current_dir=\$(pwd)
+            cd "\$lazyvim_docker_path"
+            make "\$cmd" "\$@"
+            cd "\$current_dir"
             ;;
         uninstall)
             printf "🗑️  Running complete uninstaller...\n"
-            (cd "\$lazyvim_docker_path" && ./scripts/remote-uninstall.sh)
+            local current_dir=\$(pwd)
+            cd "\$lazyvim_docker_path"
+            ./scripts/remote-uninstall.sh
+            cd "\$current_dir"
             ;;
         *)
             printf "❌ Unknown command: %s\n" "\$cmd"
@@ -206,11 +213,18 @@ lazy() {
     case "\$cmd" in
         start|enter|stop|status|health|build|restart|destroy|clean|quick|backup|restore|update|version|timezone|configure)
             printf "🚀 Running: make %s %s\n" "\$cmd" "\$@"
-            (cd "\$lazyvim_docker_path" && make "\$cmd" "\$@")
+            # Preserve TTY for interactive commands by not using subshell  
+            local current_dir=\$(pwd)
+            cd "\$lazyvim_docker_path"
+            make "\$cmd" "\$@"
+            cd "\$current_dir"
             ;;
         uninstall)
             printf "🗑️  Running complete uninstaller...\n"
-            (cd "\$lazyvim_docker_path" && ./scripts/remote-uninstall.sh)
+            local current_dir=\$(pwd)
+            cd "\$lazyvim_docker_path"
+            ./scripts/remote-uninstall.sh
+            cd "\$current_dir"
             ;;
         *)
             printf "❌ Unknown command: %s\n" "\$cmd"

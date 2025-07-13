@@ -79,34 +79,41 @@ $marker_start
 # Use 'lazy <command>' from anywhere to control LazyVim Docker
 lazyvim_docker_path="$LAZYVIM_DOCKER_PATH"
 
+# Colors for lazy command output
+LAZY_RED='\033[0;31m'
+LAZY_GREEN='\033[0;32m'
+LAZY_YELLOW='\033[1;33m'
+LAZY_BLUE='\033[0;34m'
+LAZY_NC='\033[0m' # No Color
+
 lazy() {
     if [[ \$# -eq 0 ]]; then
-        printf "LazyVim Docker - Available Commands\n"
+        printf "\${LAZY_BLUE}LazyVim Docker - Available Commands\${LAZY_NC}\n"
         printf "\n"
         printf "Usage: lazy <command>\n"
         printf "\n"
         printf "Available commands:\n"
-        printf "  start       Start the container\n"
-        printf "  enter       Enter the container (starts if stopped)\n"
-        printf "  stop        Stop the container\n"
-        printf "  status      Show container status\n"
-        printf "  health      Run health diagnostics\n"
-        printf "  build       Build/rebuild the container\n"
-        printf "  restart     Restart the container\n"
-        printf "  destroy     Destroy everything\n"
-        printf "  clean       Clean up Docker resources\n"
-        printf "  quick       Quick start (build + enter)\n"
-        printf "  backup      Backup configurations\n"
-        printf "  restore     Restore from backup\n"
-        printf "  update      Update to latest version\n"
-        printf "  version     Show version\n"
-        printf "  timezone    Check timezone configuration\n"
-        printf "  configure   Reconfigure directories and timezone\n"
-        printf "  uninstall   Complete removal (same as curl method)\n"
+        printf "  \${LAZY_GREEN}start\${LAZY_NC}       Start the container\n"
+        printf "  \${LAZY_GREEN}enter\${LAZY_NC}       Enter the container (starts if stopped)\n"
+        printf "  \${LAZY_GREEN}stop\${LAZY_NC}        Stop the container\n"
+        printf "  \${LAZY_GREEN}status\${LAZY_NC}      Show container status\n"
+        printf "  \${LAZY_GREEN}health\${LAZY_NC}      Run health diagnostics\n"
+        printf "  \${LAZY_GREEN}build\${LAZY_NC}       Build/rebuild the container\n"
+        printf "  \${LAZY_GREEN}restart\${LAZY_NC}     Restart the container\n"
+        printf "  \${LAZY_GREEN}destroy\${LAZY_NC}     Destroy everything\n"
+        printf "  \${LAZY_GREEN}clean\${LAZY_NC}       Clean up Docker resources\n"
+        printf "  \${LAZY_GREEN}quick\${LAZY_NC}       Quick start (build + enter)\n"
+        printf "  \${LAZY_GREEN}backup\${LAZY_NC}      Backup configurations\n"
+        printf "  \${LAZY_GREEN}restore\${LAZY_NC}     Restore from backup\n"
+        printf "  \${LAZY_GREEN}update\${LAZY_NC}      Update to latest version\n"
+        printf "  \${LAZY_GREEN}version\${LAZY_NC}     Show version\n"
+        printf "  \${LAZY_GREEN}timezone\${LAZY_NC}    Check timezone configuration\n"
+        printf "  \${LAZY_GREEN}configure\${LAZY_NC}   Reconfigure directories and timezone\n"
+        printf "  \${LAZY_GREEN}uninstall\${LAZY_NC}   Complete removal (same as curl method)\n"
         printf "\n"
-        printf "Examples:\n"
-        printf "  lazy enter     # Enter LazyVim from anywhere\n"
-        printf "  lazy build     # Build the environment\n"
+        printf "\${LAZY_YELLOW}Examples:\${LAZY_NC}\n"
+        printf "  \${LAZY_GREEN}lazy enter\${LAZY_NC}     # Enter LazyVim from anywhere\n"
+        printf "  \${LAZY_GREEN}lazy build\${LAZY_NC}     # Build the environment\n"
         return 0
     fi
     
@@ -176,34 +183,41 @@ $marker_start
 # Use 'lazy <command>' from anywhere to control LazyVim Docker
 lazyvim_docker_path="$LAZYVIM_DOCKER_PATH"
 
+# Colors for lazy command output
+LAZY_RED='\033[0;31m'
+LAZY_GREEN='\033[0;32m'
+LAZY_YELLOW='\033[1;33m'
+LAZY_BLUE='\033[0;34m'
+LAZY_NC='\033[0m' # No Color
+
 lazy() {
     if [[ \$# -eq 0 ]]; then
-        printf "LazyVim Docker - Available Commands\n"
+        printf "\${LAZY_BLUE}LazyVim Docker - Available Commands\${LAZY_NC}\n"
         printf "\n"
         printf "Usage: lazy <command>\n"
         printf "\n"
         printf "Available commands:\n"
-        printf "  start       Start the container\n"
-        printf "  enter       Enter the container (starts if stopped)\n"
-        printf "  stop        Stop the container\n"
-        printf "  status      Show container status\n"
-        printf "  health      Run health diagnostics\n"
-        printf "  build       Build/rebuild the container\n"
-        printf "  restart     Restart the container\n"
-        printf "  destroy     Destroy everything\n"
-        printf "  clean       Clean up Docker resources\n"
-        printf "  quick       Quick start (build + enter)\n"
-        printf "  backup      Backup configurations\n"
-        printf "  restore     Restore from backup\n"
-        printf "  update      Update to latest version\n"
-        printf "  version     Show version\n"
-        printf "  timezone    Check timezone configuration\n"
-        printf "  configure   Reconfigure directories and timezone\n"
-        printf "  uninstall   Complete removal (same as curl method)\n"
+        printf "  \${LAZY_GREEN}start\${LAZY_NC}       Start the container\n"
+        printf "  \${LAZY_GREEN}enter\${LAZY_NC}       Enter the container (starts if stopped)\n"
+        printf "  \${LAZY_GREEN}stop\${LAZY_NC}        Stop the container\n"
+        printf "  \${LAZY_GREEN}status\${LAZY_NC}      Show container status\n"
+        printf "  \${LAZY_GREEN}health\${LAZY_NC}      Run health diagnostics\n"
+        printf "  \${LAZY_GREEN}build\${LAZY_NC}       Build/rebuild the container\n"
+        printf "  \${LAZY_GREEN}restart\${LAZY_NC}     Restart the container\n"
+        printf "  \${LAZY_GREEN}destroy\${LAZY_NC}     Destroy everything\n"
+        printf "  \${LAZY_GREEN}clean\${LAZY_NC}       Clean up Docker resources\n"
+        printf "  \${LAZY_GREEN}quick\${LAZY_NC}       Quick start (build + enter)\n"
+        printf "  \${LAZY_GREEN}backup\${LAZY_NC}      Backup configurations\n"
+        printf "  \${LAZY_GREEN}restore\${LAZY_NC}     Restore from backup\n"
+        printf "  \${LAZY_GREEN}update\${LAZY_NC}      Update to latest version\n"
+        printf "  \${LAZY_GREEN}version\${LAZY_NC}     Show version\n"
+        printf "  \${LAZY_GREEN}timezone\${LAZY_NC}    Check timezone configuration\n"
+        printf "  \${LAZY_GREEN}configure\${LAZY_NC}   Reconfigure directories and timezone\n"
+        printf "  \${LAZY_GREEN}uninstall\${LAZY_NC}   Complete removal (same as curl method)\n"
         printf "\n"
-        printf "Examples:\n"
-        printf "  lazy enter     # Enter LazyVim from anywhere\n"
-        printf "  lazy build     # Build the environment\n"
+        printf "\${LAZY_YELLOW}Examples:\${LAZY_NC}\n"
+        printf "  \${LAZY_GREEN}lazy enter\${LAZY_NC}     # Enter LazyVim from anywhere\n"
+        printf "  \${LAZY_GREEN}lazy build\${LAZY_NC}     # Build the environment\n"
         return 0
     fi
     

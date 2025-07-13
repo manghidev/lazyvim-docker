@@ -11,7 +11,7 @@ LABEL maintainer="ManghiDev <https://manghi.dev>" \
 #* Install necessary dependencies and development tools
 RUN apk add --no-cache \
     # Core tools
-    git lazygit fzf curl neovim ripgrep alpine-sdk zsh sudo \
+    git lazygit fzf curl neovim ripgrep alpine-sdk bash zsh sudo \
     # Additional development tools
     tmux tree htop unzip zip \
     # Language tools

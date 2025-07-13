@@ -272,12 +272,12 @@ ask_container_restart() {
             print_success "Contenedor reconstruido e iniciado con los nuevos cambios"
         else
             print_error "Error al reconstruir el contenedor"
-            print_info "Puedes intentar manualmente con: ${GREEN}make build${NC}"
+            printf "${BLUE}[INFO]${NC} Puedes intentar manualmente con: ${GREEN}make build${NC}\n"
             return 1
         fi
     else
         print_info "El contenedor no se recargará."
-        print_info "Los cambios estarán disponibles la próxima vez que uses ${GREEN}make build${NC}"
+        printf "${BLUE}[INFO]${NC} Los cambios estarán disponibles la próxima vez que uses ${GREEN}make build${NC}\n"
     fi
 }
 
@@ -382,7 +382,7 @@ main() {
     ask_container_restart
     
     printf "\n"
-    print_info "Para usar LazyVim en cualquier momento: ${GREEN}lazy enter${NC}"
+    printf "${BLUE}[INFO]${NC} Para usar LazyVim en cualquier momento: ${GREEN}lazy enter${NC}\n"
     printf "\n"
 }
 

@@ -40,7 +40,7 @@ Complete removal when you no longer need LazyVim Docker:
 lazy uninstall
 
 # Or run directly 
-curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-uninstall.sh | bash
+curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/uninstall.sh | bash
 ```
 
 **Removes everything**: Docker containers, installation files, global commands, and shell configurations in one step.
@@ -113,14 +113,14 @@ curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scrip
 - ✅ Creates shell configuration backups
 
 ### 🔄 Update Script
-**`remote-update.sh`** - Keep your installation up to date
+**Smart Update System** - Keep your installation up to date
 
 ```bash
-# Update to latest version
+# Update to latest version (recommended)
 lazy update
 
-# Or run directly
-curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-update.sh | bash
+# Or from project directory
+make update
 ```
 
 **What it does:**
@@ -132,14 +132,14 @@ curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scrip
 - ✅ Optionally rebuilds Docker containers
 
 ### 🗑️ Uninstallation Script
-**`remote-uninstall.sh`** - Complete and safe cleanup
+**Smart Uninstaller** - Complete and safe cleanup
 
 ```bash
 # Interactive uninstall with confirmation prompt
 lazy uninstall
 
 # Or run directly with prompts
-curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/remote-uninstall.sh | bash
+curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scripts/uninstall.sh | bash
 ```
 
 **What it does when you confirm:**
@@ -184,15 +184,17 @@ curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scrip
 - Creates `~/.local/bin/lazy`
 - Creates `~/.local/share/lazyvim-docker/`
 
-### 🔄 remote-update.sh
-**Purpose**: Update existing remote installation to latest version
+### 🔄 Smart Update System
+**Purpose**: Update existing installation to latest version with intelligent version checking
 
 **Update Process:**
 1. Checks current version vs latest GitHub release
-2. Creates backup of current installation
-3. Downloads latest version to temp directory
-4. Preserves user configurations (.dotfiles, backups)
-5. Replaces system files while keeping user data
+2. Compares local and remote git commits
+3. Interactive prompts for user confirmation
+4. Creates backup of current installation
+5. Downloads latest version preserving development setup
+6. Preserves user configurations (.dotfiles, backups)
+7. Offers container rebuild options
 6. Optionally rebuilds Docker containers
 7. Cleans up temporary files
 
@@ -204,7 +206,7 @@ curl -fsSL https://raw.githubusercontent.com/manghidev/lazyvim-docker/main/scrip
 **Safe Rollback:**
 - Backup created before update in `~/.local/share/lazyvim-docker-backup-[timestamp]`
 
-### 🗑️ remote-uninstall.sh
+### 🗑️ Smart Uninstaller
 **Purpose**: Complete and safe removal of LazyVim Docker installation
 
 **Removal Process:**

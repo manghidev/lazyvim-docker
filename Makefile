@@ -2,7 +2,7 @@
 # Provides easy-to-use commands for managing the LazyVim Docker environment
 
 .PHONY: default build start enter stop destroy clean status update backup restore dev quick version bump-version restart
-.PHONY: install-global uninstall install-remote remote-uninstall remote-update configure
+.PHONY: install-global uninstall install-remote configure
 
 # Default target
 .DEFAULT_GOAL := default
@@ -118,9 +118,7 @@ status: ## Show container status
 	fi
 
 update: ## Update to latest version and rebuild
-	@echo "$(BLUE)Updating LazyVim environment...$(NC)"
-	@git pull origin main || echo "$(YELLOW)Could not pull latest changes$(NC)"
-	@make build
+	@./scripts/smart-update.sh
 
 backup: ## Backup dotfiles and configuration
 	@echo "$(BLUE)Creating backup of configuration...$(NC)"
@@ -169,7 +167,7 @@ install-global: ## Install global 'lazy' commands to use from anywhere
 
 uninstall: ## Complete uninstall - removes everything (same as curl method)
 	@echo "$(BLUE)Running complete LazyVim Docker uninstall...$(NC)"
-	@./scripts/remote-uninstall.sh
+	@./scripts/uninstall.sh
 
 install-remote:
 	@echo "$(BLUE)LazyVim Docker - Remote Installation$(NC)"
@@ -185,9 +183,9 @@ install-remote:
 
 remote-install: install-remote
 
-test-remote-scripts:
-	@echo "$(BLUE)Testing remote installation scripts...$(NC)"
+test-scripts:
+	@echo "$(BLUE)Testing installation scripts...$(NC)"
 	@bash -n scripts/start.sh && echo "$(GREEN)✓ start.sh syntax OK$(NC)"
-	@bash -n scripts/remote-uninstall.sh && echo "$(GREEN)✓ remote-uninstall.sh syntax OK$(NC)"  
-	@bash -n scripts/remote-update.sh && echo "$(GREEN)✓ remote-update.sh syntax OK$(NC)"
-	@echo "$(GREEN)All remote scripts passed syntax check!$(NC)"
+	@bash -n scripts/uninstall.sh && echo "$(GREEN)✓ uninstall.sh syntax OK$(NC)"  
+	@bash -n scripts/smart-update.sh && echo "$(GREEN)✓ smart-update.sh syntax OK$(NC)"
+	@echo "$(GREEN)All scripts passed syntax check!$(NC)"

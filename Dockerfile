@@ -5,7 +5,7 @@ ARG VERSION
 
 #* Set metadata for image
 LABEL maintainer="ManghiDev <https://manghi.dev>" \
-    description="Dockerfile for LazyVim and Zsh with oh-my-zsh" \
+    description="Dockerfile for LazyVim" \
     version=$VERSION
 
 #* Install necessary dependencies and development tools
@@ -45,52 +45,52 @@ RUN set -eux; \
     echo "Setting up user with UID: $USER_UID, GID: $USER_GID"; \
     # Handle group creation/selection
     if getent group $USER_GID >/dev/null 2>&1; then \
-        GROUP_NAME=$(getent group $USER_GID | cut -d: -f1); \
-        echo "Using existing group: $GROUP_NAME (GID: $USER_GID)"; \
+    GROUP_NAME=$(getent group $USER_GID | cut -d: -f1); \
+    echo "Using existing group: $GROUP_NAME (GID: $USER_GID)"; \
     else \
-        # Check if developer group exists with different GID
-        if getent group developer >/dev/null 2>&1; then \
-            # Remove existing developer group if it has different GID
-            delgroup developer || true; \
-        fi; \
-        addgroup -g $USER_GID developer; \
-        GROUP_NAME="developer"; \
-        echo "Created group: $GROUP_NAME (GID: $USER_GID)"; \
+    # Check if developer group exists with different GID
+    if getent group developer >/dev/null 2>&1; then \
+    # Remove existing developer group if it has different GID
+    delgroup developer || true; \
+    fi; \
+    addgroup -g $USER_GID developer; \
+    GROUP_NAME="developer"; \
+    echo "Created group: $GROUP_NAME (GID: $USER_GID)"; \
     fi; \
     # Handle user creation/modification
     if getent passwd $USER_UID >/dev/null 2>&1; then \
-        # User with this UID already exists
-        EXISTING_USER=$(getent passwd $USER_UID | cut -d: -f1); \
-        echo "User with UID $USER_UID already exists: $EXISTING_USER"; \
-        # Change the user's primary group to our target group
-        sed -i "s/^$EXISTING_USER:\([^:]*\):\([^:]*\):\([^:]*\):/$EXISTING_USER:\1:\2:$USER_GID:/" /etc/passwd; \
-        # Ensure the user has zsh shell
-        sed -i "s|^$EXISTING_USER:\([^:]*\):\([^:]*\):\([^:]*\):\([^:]*\):\([^:]*\):\(.*\)|$EXISTING_USER:\1:\2:\3:\4:\5:/bin/zsh|" /etc/passwd; \
-        # Add to sudoers if not already there
-        if ! grep -q "^$EXISTING_USER " /etc/sudoers; then \
-            echo "$EXISTING_USER ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers; \
-        fi; \
-        # Get user's home directory and set environment variable
-        USER_HOME=$(getent passwd $EXISTING_USER | cut -d: -f6); \
-        echo "export USER_HOME=$USER_HOME" >> /etc/environment; \
-        # Create developer symlink if the user isn't named developer
-        if [ "$EXISTING_USER" != "developer" ]; then \
-            # Create symlink for compatibility
-            if [ ! -e /home/developer ]; then \
-                ln -sf $USER_HOME /home/developer; \
-            fi; \
-        fi; \
-        echo "Using existing user: $EXISTING_USER with home: $USER_HOME"; \
+    # User with this UID already exists
+    EXISTING_USER=$(getent passwd $USER_UID | cut -d: -f1); \
+    echo "User with UID $USER_UID already exists: $EXISTING_USER"; \
+    # Change the user's primary group to our target group
+    sed -i "s/^$EXISTING_USER:\([^:]*\):\([^:]*\):\([^:]*\):/$EXISTING_USER:\1:\2:$USER_GID:/" /etc/passwd; \
+    # Ensure the user has zsh shell
+    sed -i "s|^$EXISTING_USER:\([^:]*\):\([^:]*\):\([^:]*\):\([^:]*\):\([^:]*\):\(.*\)|$EXISTING_USER:\1:\2:\3:\4:\5:/bin/zsh|" /etc/passwd; \
+    # Add to sudoers if not already there
+    if ! grep -q "^$EXISTING_USER " /etc/sudoers; then \
+    echo "$EXISTING_USER ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers; \
+    fi; \
+    # Get user's home directory and set environment variable
+    USER_HOME=$(getent passwd $EXISTING_USER | cut -d: -f6); \
+    echo "export USER_HOME=$USER_HOME" >> /etc/environment; \
+    # Create developer symlink if the user isn't named developer
+    if [ "$EXISTING_USER" != "developer" ]; then \
+    # Create symlink for compatibility
+    if [ ! -e /home/developer ]; then \
+    ln -sf $USER_HOME /home/developer; \
+    fi; \
+    fi; \
+    echo "Using existing user: $EXISTING_USER with home: $USER_HOME"; \
     else \
-        # No user with this UID, create new developer user
-        # First, remove any existing developer user with different UID
-        if getent passwd developer >/dev/null 2>&1; then \
-            deluser developer || true; \
-        fi; \
-        # Create the developer user
-        adduser -D -u $USER_UID -G $GROUP_NAME -s /bin/zsh developer; \
-        echo "Created user: developer (UID: $USER_UID, GID: $USER_GID)"; \
-        echo "developer ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers; \
+    # No user with this UID, create new developer user
+    # First, remove any existing developer user with different UID
+    if getent passwd developer >/dev/null 2>&1; then \
+    deluser developer || true; \
+    fi; \
+    # Create the developer user
+    adduser -D -u $USER_UID -G $GROUP_NAME -s /bin/zsh developer; \
+    echo "Created user: developer (UID: $USER_UID, GID: $USER_GID)"; \
+    echo "developer ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers; \
     fi
 
 #* Switch to the developer user for the rest of the setup  
@@ -164,13 +164,13 @@ USER root
 RUN USER_HOME=$(getent passwd $USER_UID | cut -d: -f6) && \
     echo "Creating cache directories in: $USER_HOME" && \
     mkdir -p $USER_HOME/.cache/nvim $USER_HOME/.cache/zsh $USER_HOME/.cache/pip \
-             $USER_HOME/.local/share/nvim $USER_HOME/.local/state/nvim \
-             $USER_HOME/.cache/gitstatus $USER_HOME/.cache/p10k && \
+    $USER_HOME/.local/share/nvim $USER_HOME/.local/state/nvim \
+    $USER_HOME/.cache/gitstatus $USER_HOME/.cache/p10k && \
     chown -R $USER_UID:$USER_GID $USER_HOME && \
     chmod -R 755 $USER_HOME/.cache $USER_HOME/.local && \
     # Also ensure the developer symlink has proper permissions if it exists
     if [ -L /home/developer ]; then \
-        chown -h $USER_UID:$USER_GID /home/developer; \
+    chown -h $USER_UID:$USER_GID /home/developer; \
     fi
 
 #* Switch back to the container user

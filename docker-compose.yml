@@ -1,5 +1,5 @@
 services:
-  editor:
+  code-editor:
     build:
       context: .
       args:
@@ -7,8 +7,8 @@ services:
         TIMEZONE: America/Mexico_City
         USER_UID: ${USER_UID:-1000}
         USER_GID: ${USER_GID:-1000}
-    container_name: lazyVim
-    hostname: lazyVim
+    container_name: lazyvim
+    hostname: lazyvim-dev
     restart: unless-stopped
     volumes:
       #* Persistent dotfiles

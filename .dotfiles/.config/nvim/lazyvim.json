@@ -1,7 +1,5 @@
 {
   "extras": [
-    "lazyvim.plugins.extras.ai.copilot",
-    "lazyvim.plugins.extras.ai.copilot-chat",
     "lazyvim.plugins.extras.editor.fzf",
     "lazyvim.plugins.extras.editor.neo-tree",
     "lazyvim.plugins.extras.lang.angular",

@@ -308,6 +308,29 @@ make configure    # (from project directory)
 - ✅ **Directories**: Choose which local directories to mount in the container
 - ✅ **Projects Folder**: Set up your main development directory
 - ✅ **Custom Mounts**: Add any additional directories you need
+- ✅ **Dotfiles Integration**: Import your personal configuration files
+
+### 🎨 Dotfiles Integration
+Bring your personal development environment into the container:
+
+```bash
+# Import dotfiles during configuration
+lazy configure  # Choose option 5 for dotfiles integration
+```
+
+**Supported sources:**
+- **Git Repository**: Clone from GitHub, GitLab, or GitBucket
+- **Local ZIP file**: Import from a local archive
+
+**Supported configurations:**
+- Neovim (nvim) - Custom LazyVim configurations
+- Zsh - Shell aliases, exports, and customizations  
+- Git - User settings and global gitignore
+- Tmux - Terminal multiplexer configuration
+- Scripts - Custom development tools
+
+> 📖 **Important**: Your dotfiles must follow the LazyVim Docker standard.  
+> See detailed documentation: [`docs/DOTFILES_STANDARD.md`](docs/DOTFILES_STANDARD.md)
 
 ### 📁 Directory Configuration Examples
 

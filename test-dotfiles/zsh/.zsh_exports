@@ -1,0 +1,28 @@
+# Example exports for LazyVim Docker
+# This is a test configuration file
+
+# Editor
+export EDITOR='nvim'
+export VISUAL='nvim'
+
+# Language
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
+# Development paths
+export PATH="$HOME/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+
+# Node.js
+export NODE_ENV=development
+
+# Python
+export PYTHONPATH="$PYTHONPATH:$HOME/dev"
+
+# Custom environment variables
+export DOTFILES_LOADED="true"
+export LAZYVIM_DOCKER_CUSTOM="enabled"
+
+# Colors for ls
+export CLICOLOR=1
+export LSCOLORS=GxFxCxDxBxegedabagaced

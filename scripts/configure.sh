@@ -510,6 +510,319 @@ configure_projects_directory() {
     esac
 }
 
+# Dotfiles configuration functions
+validate_dotfiles_config() {
+    local dotfiles_path="$1"
+    local config_file="$dotfiles_path/.lazyvim-docker-dotfiles"
+    
+    if [[ ! -f "$config_file" ]]; then
+        log_error "No .lazyvim-docker-dotfiles configuration file found"
+        log_info "Please see docs/DOTFILES_STANDARD.md for the required format"
+        return 1
+    fi
+    
+    log_success "Valid dotfiles configuration found"
+    return 0
+}
+
+install_dotfiles() {
+    local dotfiles_path="$1"
+    local config_file="$dotfiles_path/.lazyvim-docker-dotfiles"
+    
+    log_step "Installing dotfiles from: $dotfiles_path"
+    
+    # Create backup directory
+    local backup_dir="/tmp/dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
+    mkdir -p "$backup_dir"
+    
+    # Read configuration and install each section
+    while IFS= read -r line; do
+        # Skip comments and empty lines
+        [[ "$line" =~ ^[[:space:]]*# ]] && continue
+        [[ -z "${line// }" ]] && continue
+        
+        # Parse sections
+        if [[ "$line" =~ ^\[([^]]+)\] ]]; then
+            current_section="${BASH_REMATCH[1]}"
+            continue
+        fi
+        
+        # Parse key=value pairs
+        if [[ "$line" =~ ^([^=]+)=(.+)$ ]]; then
+            local key="${BASH_REMATCH[1]// }"
+            local value="${BASH_REMATCH[2]// }"
+            
+            case "$current_section" in
+                "nvim"|"zsh"|"git"|"tmux"|"scripts")
+                    if [[ "$key" == "enabled" && "$value" == "true" ]]; then
+                        install_dotfiles_section "$current_section" "$dotfiles_path" "$config_file" "$backup_dir"
+                    fi
+                    ;;
+            esac
+        fi
+    done < "$config_file"
+    
+    log_success "Dotfiles installation completed!"
+    log_info "Backup created at: $backup_dir"
+    
+    # Add dotfiles path to docker-compose for persistence
+    add_directory_mount "$dotfiles_path" "/home/developer/.dotfiles"
+}
+
+install_dotfiles_section() {
+    local section="$1"
+    local dotfiles_path="$2"
+    local config_file="$3"
+    local backup_dir="$4"
+    
+    local source_path=""
+    local target_path=""
+    local backup_original="true"
+    local files=""
+    local make_executable="false"
+    
+    # Read section configuration
+    local in_section=false
+    while IFS= read -r line; do
+        if [[ "$line" =~ ^\[$section\] ]]; then
+            in_section=true
+            continue
+        elif [[ "$line" =~ ^\[[^]]+\] ]]; then
+            in_section=false
+            continue
+        fi
+        
+        if [[ "$in_section" == true && "$line" =~ ^([^=]+)=(.+)$ ]]; then
+            local key="${BASH_REMATCH[1]// }"
+            local value="${BASH_REMATCH[2]// }"
+            
+            case "$key" in
+                "source_path") source_path="$value" ;;
+                "target_path") target_path="$value" ;;
+                "backup_original") backup_original="$value" ;;
+                "files") files="$value" ;;
+                "make_executable") make_executable="$value" ;;
+            esac
+        fi
+    done < "$config_file"
+    
+    # Validate required fields
+    if [[ -z "$source_path" || -z "$target_path" ]]; then
+        log_warning "Skipping $section: missing source_path or target_path"
+        return
+    fi
+    
+    local full_source_path="$dotfiles_path/$source_path"
+    if [[ ! -d "$full_source_path" ]]; then
+        log_warning "Skipping $section: source path not found: $full_source_path"
+        return
+    fi
+    
+    log_step "Installing $section configuration..."
+    
+    # Create target directory
+    mkdir -p "$target_path"
+    
+    # Install files
+    if [[ -n "$files" ]]; then
+        # Install specific files
+        IFS=',' read -ra file_array <<< "$files"
+        for file in "${file_array[@]}"; do
+            file="${file// }"  # Trim whitespace
+            local source_file="$full_source_path/$file"
+            local target_file="$target_path/$file"
+            
+            if [[ -f "$source_file" ]]; then
+                # Backup original if requested
+                if [[ "$backup_original" == "true" && -f "$target_file" ]]; then
+                    cp "$target_file" "$backup_dir/${section}_${file##*/}" 2>/dev/null || true
+                fi
+                
+                cp "$source_file" "$target_file"
+                
+                if [[ "$make_executable" == "true" ]]; then
+                    chmod +x "$target_file"
+                fi
+                
+                log_success "Installed: $file"
+            else
+                log_warning "File not found: $source_file"
+            fi
+        done
+    else
+        # Install entire directory
+        if [[ "$backup_original" == "true" && -d "$target_path" ]]; then
+            cp -r "$target_path" "$backup_dir/${section}_backup" 2>/dev/null || true
+        fi
+        
+        cp -r "$full_source_path"/* "$target_path/" 2>/dev/null || true
+        
+        if [[ "$make_executable" == "true" ]]; then
+            find "$target_path" -type f -name "*.sh" -exec chmod +x {} \;
+        fi
+        
+        log_success "Installed: $section directory"
+    fi
+}
+
+clone_dotfiles_from_git() {
+    local git_url="$1"
+    local temp_dir="/tmp/dotfiles-clone-$(date +%Y%m%d-%H%M%S)"
+    
+    log_step "Cloning dotfiles from: $git_url"
+    
+    if git clone "$git_url" "$temp_dir"; then
+        log_success "Successfully cloned dotfiles"
+        echo "$temp_dir"
+        return 0
+    else
+        log_error "Failed to clone repository"
+        rm -rf "$temp_dir" 2>/dev/null || true
+        return 1
+    fi
+}
+
+extract_dotfiles_from_zip() {
+    local zip_path="$1"
+    local temp_dir="/tmp/dotfiles-extract-$(date +%Y%m%d-%H%M%S)"
+    
+    log_step "Extracting dotfiles from: $zip_path"
+    
+    mkdir -p "$temp_dir"
+    
+    if command -v unzip &> /dev/null; then
+        if unzip -q "$zip_path" -d "$temp_dir"; then
+            # Find the actual dotfiles directory (might be nested)
+            local dotfiles_dir
+            if [[ -f "$temp_dir/.lazyvim-docker-dotfiles" ]]; then
+                dotfiles_dir="$temp_dir"
+            else
+                dotfiles_dir=$(find "$temp_dir" -name ".lazyvim-docker-dotfiles" -type f -exec dirname {} \; | head -1)
+            fi
+            
+            if [[ -n "$dotfiles_dir" ]]; then
+                log_success "Successfully extracted dotfiles"
+                echo "$dotfiles_dir"
+                return 0
+            else
+                log_error "No valid dotfiles configuration found in ZIP"
+                rm -rf "$temp_dir" 2>/dev/null || true
+                return 1
+            fi
+        else
+            log_error "Failed to extract ZIP file"
+            rm -rf "$temp_dir" 2>/dev/null || true
+            return 1
+        fi
+    else
+        log_error "unzip command not found"
+        rm -rf "$temp_dir" 2>/dev/null || true
+        return 1
+    fi
+}
+
+configure_dotfiles() {
+    printf "\n"
+    printf "⚙️  Dotfiles Integration:\n"
+    printf "\n"
+    printf "Import your personal dotfiles to customize the container environment.\n"
+    printf "See ${CYAN}docs/DOTFILES_STANDARD.md${NC} for the required format.\n"
+    printf "\n"
+    
+    while true; do
+        printf "Choose dotfiles source:\n"
+        printf "  ${GREEN}1.${NC} Git Repository (GitHub, GitLab, GitBucket)\n"
+        printf "  ${BLUE}2.${NC} Local ZIP File\n"
+        printf "  ${YELLOW}3.${NC} Skip dotfiles configuration\n"
+        printf "\n"
+        
+        read -p "Select option (1-3): " choice
+        printf "\n"
+        
+        case "$choice" in
+            1)
+                printf "Enter Git repository URL:\n"
+                printf "${GRAY}Examples:${NC}\n"
+                printf "  https://github.com/username/dotfiles.git\n"
+                printf "  https://gitlab.com/username/dotfiles.git\n"
+                printf "  https://gitbucket.yourserver.com/username/dotfiles.git\n"
+                printf "\n"
+                
+                read -p "Repository URL: " git_url
+                
+                if [[ -z "$git_url" ]]; then
+                    log_warning "No URL provided"
+                    continue
+                fi
+                
+                if ! [[ "$git_url" =~ ^https?:// ]]; then
+                    log_error "Please provide a valid HTTPS URL"
+                    continue
+                fi
+                
+                if dotfiles_path=$(clone_dotfiles_from_git "$git_url"); then
+                    if validate_dotfiles_config "$dotfiles_path"; then
+                        install_dotfiles "$dotfiles_path"
+                        log_success "Dotfiles configured successfully!"
+                        return 0
+                    fi
+                fi
+                ;;
+            2)
+                printf "Enter the full path to your ZIP file:\n"
+                printf "${GRAY}Examples:${NC}\n"
+                printf "  /Users/$(whoami)/Documents/my-dotfiles.zip\n"
+                printf "  \$(pwd)/dotfiles.zip  ${GRAY}(if in current directory)${NC}\n"
+                printf "\n"
+                printf "${YELLOW}Tip:${NC} Use 'pwd' to get your current directory path\n"
+                printf "Current directory: ${CYAN}$(pwd)${NC}\n"
+                printf "\n"
+                
+                read -p "ZIP file path: " zip_path
+                
+                if [[ -z "$zip_path" ]]; then
+                    log_warning "No path provided"
+                    continue
+                fi
+                
+                # Expand variables like $(pwd)
+                zip_path=$(eval echo "$zip_path")
+                
+                # Expand ~ to $HOME
+                if [[ "$zip_path" =~ ^~ ]]; then
+                    zip_path="${zip_path/#\~/$HOME}"
+                fi
+                
+                if [[ ! -f "$zip_path" ]]; then
+                    log_error "ZIP file not found: $zip_path"
+                    continue
+                fi
+                
+                if ! [[ "$zip_path" =~ \.zip$ ]]; then
+                    log_error "File must have .zip extension"
+                    continue
+                fi
+                
+                if dotfiles_path=$(extract_dotfiles_from_zip "$zip_path"); then
+                    if validate_dotfiles_config "$dotfiles_path"; then
+                        install_dotfiles "$dotfiles_path"
+                        log_success "Dotfiles configured successfully!"
+                        return 0
+                    fi
+                fi
+                ;;
+            3)
+                log_info "Skipping dotfiles configuration"
+                return 0
+                ;;
+            *)
+                log_warning "Invalid option. Please select 1-3."
+                ;;
+        esac
+        printf "\n"
+    done
+}
+
 # Interactive menu for additional directories
 configure_additional_directories() {
     printf "\n"
@@ -522,10 +835,11 @@ configure_additional_directories() {
         printf "  ${YELLOW}2.${NC} Remove directory mount\n"
         printf "  ${BLUE}3.${NC} List current mounts\n"
         printf "  ${PURPLE}4.${NC} Add multiple directories at once\n"
-        printf "  ${RED}5.${NC} Continue with configuration\n"
+        printf "  ${CYAN}5.${NC} Configure dotfiles integration\n"
+        printf "  ${RED}6.${NC} Continue with configuration\n"
         printf "\n"
         
-        read -p "Select option (1-5): " choice
+        read -p "Select option (1-6): " choice
         printf "\n"
         
         case "$choice" in
@@ -631,10 +945,13 @@ configure_additional_directories() {
                 fi
                 ;;
             5)
+                configure_dotfiles
+                ;;
+            6)
                 break
                 ;;
             *)
-                log_warning "Invalid option. Please select 1-5."
+                log_warning "Invalid option. Please select 1-6."
                 ;;
         esac
         printf "\n"

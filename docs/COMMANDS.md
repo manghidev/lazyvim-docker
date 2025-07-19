@@ -49,6 +49,31 @@ This document provides a comprehensive guide to all available commands in the La
 | `make bump-version TYPE=minor` | Bump minor version (1.0.0 → 1.1.0) | `make bump-version TYPE=minor` |
 | `make bump-version TYPE=major` | Bump major version (1.0.0 → 2.0.0) | `make bump-version TYPE=major` |
 
+### Configuration
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `make configure` | Interactive configuration menu | `make configure` |
+| `lazy configure` | Configure from anywhere (remote installation) | `lazy configure` |
+
+#### Configuration Options Available:
+
+1. **Directory Management**
+   - Add/remove custom directory mounts
+   - Configure Documents and Projects directories
+   - Batch directory addition
+
+2. **Dotfiles Integration** 
+   - Import personal configuration files
+   - Support for Git repositories and ZIP files
+   - Automated backup of existing configurations
+
+3. **Timezone Configuration**
+   - Set container timezone to match your system
+   - Common timezone detection and selection
+
+> 📖 **Dotfiles Documentation**: See [`docs/DOTFILES_STANDARD.md`](DOTFILES_STANDARD.md) for detailed information about importing your personal configurations.
+
 ## Shell Scripts (Not Recommended - Use Make Instead)
 
 > **⚠️ Warning**: These scripts are for internal use. Use `make` commands instead for better experience.
@@ -184,3 +209,160 @@ Once inside the container, these keyboard shortcuts are available:
 - `find` - Better find with fd
 - `vim`/`vi` - Opens neovim
 - `lg` - Opens lazygit
+
+## Dotfiles Integration
+
+LazyVim Docker supports importing your personal dotfiles to customize the container environment. This feature allows you to bring your familiar development setup into the container.
+
+### Quick Start
+
+1. **Run configuration**:
+   ```bash
+   make configure  # or lazy configure
+   ```
+
+2. **Choose option 5** for dotfiles integration
+
+3. **Select your source**:
+   - **Option 1**: Git Repository (GitHub, GitLab, GitBucket)
+   - **Option 2**: Local ZIP file
+
+### Git Repository Method
+
+When prompted, enter your repository URL:
+```bash
+# Examples:
+https://github.com/yourusername/dotfiles.git
+https://gitlab.com/yourusername/dotfiles.git
+https://gitbucket.yourserver.com/yourusername/dotfiles.git
+```
+
+The system will:
+1. Clone your repository
+2. Validate the configuration file
+3. Install configurations according to your settings
+4. Create backups of existing files
+
+### ZIP File Method
+
+When prompted, enter the full path to your ZIP file:
+```bash
+# Examples:
+/Users/yourname/Documents/my-dotfiles.zip
+$(pwd)/dotfiles.zip  # If in current directory
+```
+
+**Tip**: Use `pwd` to get your current directory path.
+
+### Required Structure
+
+Your dotfiles repository or ZIP must include a `.lazyvim-docker-dotfiles` configuration file. Example:
+
+```ini
+[metadata]
+name=My Personal Dotfiles
+version=1.0.0
+author=Your Name
+
+[nvim]
+enabled=true
+source_path=nvim
+target_path=/home/developer/.config/nvim
+backup_original=true
+
+[zsh]
+enabled=true
+source_path=zsh
+target_path=/home/developer
+files=.zshrc,.zsh_aliases,.zsh_exports
+
+[git]
+enabled=true
+source_path=git
+target_path=/home/developer
+files=.gitconfig,.gitignore_global
+```
+
+### Supported Configurations
+
+| Category | Description | Target Location |
+|----------|-------------|----------------|
+| **nvim** | Neovim/LazyVim configuration | `~/.config/nvim` |
+| **zsh** | Shell aliases, exports, customizations | `~/` |
+| **git** | Git user settings and global gitignore | `~/` |
+| **tmux** | Terminal multiplexer configuration | `~/` |
+| **scripts** | Custom development tools | `~/bin` |
+
+### Testing Your Setup
+
+After installation, verify your dotfiles:
+
+```bash
+# Check if dotfiles are loaded
+echo $DOTFILES_LOADED
+
+# Test custom aliases (if you have them)
+alias
+
+# Check Neovim configuration
+nvim +checkhealth
+
+# List installed scripts
+ls -la ~/bin
+```
+
+### Creating Test Dotfiles
+
+LazyVim Docker includes example dotfiles for testing:
+
+```bash
+# Location of test dotfiles
+ls -la test-dotfiles/
+
+# Create test ZIP
+cd test-dotfiles && zip -r ../test-dotfiles.zip .
+
+# Use in configuration
+make configure  # Option 5 -> Option 2 -> Enter ZIP path
+```
+
+### Best Practices
+
+1. **Keep it minimal**: Only include essential configurations
+2. **Test locally**: Ensure your dotfiles work in a clean environment  
+3. **Version control**: Use Git tags for stable releases
+4. **Security**: Never include sensitive information (passwords, tokens)
+5. **Documentation**: Include README.md explaining your setup
+
+### Troubleshooting
+
+**Missing configuration file**:
+```
+Error: No .lazyvim-docker-dotfiles found
+```
+- Solution: Add the required configuration file to your dotfiles root
+
+**Invalid source paths**:
+```
+Error: Source path 'xyz' not found
+```
+- Solution: Verify paths in configuration match actual directories
+
+**Permission issues**:
+```
+Error: Cannot create target directory
+```
+- Solution: Ensure target paths are writable in the container
+
+### Complete Documentation
+
+For detailed information about the dotfiles standard, structure requirements, and advanced configuration options, see:
+
+📖 **[`docs/DOTFILES_STANDARD.md`](DOTFILES_STANDARD.md)**
+
+This includes:
+- Complete configuration file format
+- Directory structure requirements
+- Security considerations
+- Migration guide for existing dotfiles
+- Validation rules and best practices

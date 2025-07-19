@@ -1,0 +1,42 @@
+# .lazyvim-docker-dotfiles
+# LazyVim Docker Dotfiles Configuration
+
+[metadata]
+name=Example Test Dotfiles
+version=1.0.0
+author=LazyVim Docker
+description=Example dotfiles configuration for testing
+
+[nvim]
+enabled=true
+source_path=nvim
+target_path=/home/developer/.config/nvim
+backup_original=true
+
+[zsh]
+enabled=true
+source_path=zsh
+target_path=/home/developer
+backup_original=true
+files=.zshrc,.zsh_aliases,.zsh_exports
+
+[git]
+enabled=true
+source_path=git
+target_path=/home/developer
+backup_original=true
+files=.gitconfig,.gitignore_global
+
+[tmux]
+enabled=false
+source_path=tmux
+target_path=/home/developer
+backup_original=true
+files=.tmux.conf
+
+[scripts]
+enabled=true
+source_path=scripts
+target_path=/home/developer/bin
+backup_original=false
+make_executable=true

@@ -94,7 +94,7 @@ clean: ## Clean up unused Docker resources
 	@docker volume prune -f
 	@echo "$(GREEN)Cleanup completed$(NC)"
 
-configure: ## Reconfigure directories and timezone
+configure: ## Reconfigure directories, timezone, and dotfiles integration
 	@echo "$(BLUE)Reconfiguring LazyVim Docker environment...$(NC)"
 	@./scripts/configure.sh
 

@@ -1,0 +1,32 @@
+# Example aliases for LazyVim Docker
+# This is a test configuration file
+
+# Git aliases
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit'
+alias gp='git push'
+alias gl='git log --oneline'
+alias gd='git diff'
+
+# Directory navigation
+alias ll='ls -la'
+alias la='ls -A'
+alias l='ls -CF'
+
+# Docker aliases
+alias dps='docker ps'
+alias dpa='docker ps -a'
+alias di='docker images'
+
+# LazyVim specific
+alias lv='nvim'
+alias vim='nvim'
+alias vi='nvim'
+
+# Development aliases
+alias serve='python3 -m http.server'
+alias ports='netstat -tuln'
+
+# Test dotfiles
+alias test-dotfiles='echo "✅ Custom dotfiles aliases loaded successfully!"'
